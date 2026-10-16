@@ -19,11 +19,27 @@
   ],
   "original_five_tcp_passed": true,
   "skipped_cases": [],
-  "seconds": 2.69,
+  "seconds": 2.965,
   "python": "3.14.7",
   "live_paypal": "not_run_by_this_suite",
-  "separate_sandbox_evidence": "docs/sandbox-results.json",
+  "separate_sandbox_evidence": "reports/paypal-sandbox.json",
   "live_llm": "not_run",
   "single_llm_memory_baseline": "not_run",
-  "scope": "Local ledger and gateway checks. Adapter tests use handwritten fixtures and offline replay of sanitized actual sandbox responses. No live provider calls in this suite."
+  "scope": "Local ledger and gateway checks. Adapter tests use handwritten fixtures and offline replay of sanitized actual sandbox responses. No live provider calls in this suite.",
+  "provenance": {
+    "recorded_at_utc": "2026-10-16T22:14:05.836636+00:00",
+    "source_revision": "edf953eb9d2cf8cd41def41c2531f4779301a3d7",
+    "source_tree_dirty": false,
+    "dirty_check_excludes": [
+      "reports/"
+    ],
+    "command": [
+      "python",
+      "evaluate.py",
+      "--report",
+      "reports/local-checks.json",
+      "--require-tcp"
+    ],
+    "python": "3.14.7"
+  }
 }

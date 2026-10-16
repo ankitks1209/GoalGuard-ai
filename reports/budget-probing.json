@@ -14,7 +14,7 @@
     "Accepted reservations stay counted; attacker does not cancel or reset the ledger.",
     "Decision outcomes and counteroffers still leak feasibility; proposal caps do not guarantee privacy.",
     "Multiple authorized agents can combine observations; quotas can also block legitimate fourth proposals.",
-    "Gateway period is a trusted fixed prototype ID until the financial-plan layer supplies real periods."
+    "This legacy aggregate test uses a fixed prototype period; confirmed financial plans use their actual plan ID."
   ],
   "results": [
     {
@@ -897,5 +897,20 @@
         }
       ]
     }
-  ]
+  ],
+  "provenance": {
+    "recorded_at_utc": "2026-10-16T22:14:06.243924+00:00",
+    "source_revision": "edf953eb9d2cf8cd41def41c2531f4779301a3d7",
+    "source_tree_dirty": false,
+    "dirty_check_excludes": [
+      "reports/"
+    ],
+    "command": [
+      "python",
+      "probe_evaluate.py",
+      "--report",
+      "reports/budget-probing.json"
+    ],
+    "python": "3.14.7"
+  }
 }
