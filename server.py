@@ -97,6 +97,12 @@ def make_handler(gateway: Gateway, tokens: dict):
                     result = gateway.budget(principal)
                 elif method == "POST" and path == "/v1/proposals":
                     result = gateway.propose(principal, self._body())
+                elif path == "/v1/plan" and method == "GET":
+                    result = gateway.plan(principal)
+                elif path == "/v1/plan/audit" and method == "GET":
+                    result = gateway.plan(principal, "audit")
+                elif path in ("/v1/plan/preview", "/v1/plan/confirm", "/v1/plan/cash-events") and method == "POST":
+                    result = gateway.plan(principal, path.rsplit("/", 1)[-1], self._body())
                 elif path.startswith("/v1/purchases/"):
                     parts = path.split("/")
                     purchase = parts[3]
@@ -165,13 +171,13 @@ def main():
     except Rejection as error:
         if error.code != "unknown_household":
             raise
-        ledger.create_household("demo-home", 60_000, 25_000)
+        ledger.create_household("demo-home", 0, 0)
     tokens = token_config(args.state_dir / "tokens.json")
     paypal = None
     config = sandbox_config(args.env_file)
     if all(config[key] for key in SANDBOX_KEYS):
         paypal = PayPal(*(config[key] for key in SANDBOX_KEYS))
-    gateway = Gateway(ledger, Catalog(), paypal)
+    gateway = Gateway(ledger, Catalog(), paypal, require_plan=True)
     server = ThreadingHTTPServer(("127.0.0.1", args.port), make_handler(gateway, tokens))
     stop = threading.Event()
     def sweep():
@@ -182,7 +188,8 @@ def main():
     print(f"GoalGuard API: http://127.0.0.1:{server.server_port}")
     print(f"Scoped tokens stored locally in {args.state_dir / 'tokens.json'}; never give owner token to a model.")
     print("Catalog: synthetic. Fulfilment: manual demo action. PayPal: " +
-          ("sandbox adapter configured, not yet verified" if paypal else "not configured"))
+          ("sandbox adapter configured; consult saved verification evidence" if paypal else "not configured"))
+    print("Purchasing requires an owner-confirmed current financial plan; no plan is activated automatically.")
     try:
         server.serve_forever()
     except KeyboardInterrupt:

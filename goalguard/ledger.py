@@ -173,15 +173,19 @@ class Ledger:
                     PRIMARY KEY(household, agent, period_id, request_key)
                 );
             """)
+            from .plans import SCHEMA
+            db.executescript(SCHEMA)
         with self._transaction() as db:
             # Upgrade existing local prototypes without rotating live permissions.
             for table, column, definition in (
                 ("purchases", "permit_consumed_at", "REAL"),
                 ("operations", "intent_json", "TEXT"),
+                ("purchases", "plan_id", "TEXT REFERENCES financial_plans(id)"),
             ):
                 names = {row["name"] for row in db.execute(f"PRAGMA table_info({table})")}
                 if column not in names:
                     db.execute(f"ALTER TABLE {table} ADD COLUMN {column} {definition}")
+            db.execute("CREATE INDEX IF NOT EXISTS purchases_by_plan ON purchases(plan_id,state)")
             old = db.execute("SELECT value FROM settings WHERE key='signing_key'").fetchone()
             self.signing_key_path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
             if not self.signing_key_path.exists():
@@ -236,6 +240,10 @@ class Ledger:
         return row
 
     def _summary(self, db, household: str) -> dict:
+        from .plans import FinancialPlans
+        plan = FinancialPlans.active(db, household)
+        if plan:
+            return FinancialPlans(self).summary(db, household, plan)
         owner = self._household(db, household)
         rows = db.execute("SELECT state,amount_cents FROM purchases WHERE household=?",
                           (household,)).fetchall()
@@ -249,6 +257,14 @@ class Ledger:
                 "protected_cents": owner["protected_cents"], "spent_cents": spent,
                 "encumbered_cents": encumbered, "available_cents": available,
                 "policy_version": owner["policy_version"]}
+
+    def _check_policy(self, db, row):
+        summary = self._summary(db, row["household"])
+        if "plan_id" in summary:
+            if row["plan_id"] != summary["plan_id"] or row["policy_version"] != summary["policy_version"]:
+                raise Rejection("policy_changed", "Review a new proposal under the current financial plan.")
+            if not summary["can_propose"]:
+                raise Rejection("plan_not_ready", "The current financial plan does not permit new purchases.")
 
     def _expire(self, db, household: str):
         # Once payment I/O starts, local expiry must never assume no money moved.
@@ -287,21 +303,26 @@ class Ledger:
             raise Rejection("invalid_request", "A bounded request key is required.")
         with self._transaction() as db:
             self._household(db, household)
+            from .plans import FinancialPlans
+            plan = FinancialPlans.active(db, household)
+            if plan:
+                period_id = plan["id"]
             old = db.execute("""SELECT request_hash FROM proposal_attempts WHERE
                 household=? AND agent=? AND period_id=? AND request_key=?""",
                 (household, agent, period_id, request_key)).fetchone()
             if old:
                 if old["request_hash"] != request_hash:
                     raise Rejection("idempotency_conflict", "Request key cannot change its cart.")
-                return
+                return plan["id"] if plan else None
             used = db.execute("""SELECT COUNT(*) FROM proposal_attempts WHERE
                 household=? AND agent=? AND period_id=?""", (household, agent, period_id)).fetchone()[0]
             if used >= limit:
                 raise Rejection("proposal_limit", "Proposal allowance exhausted.")
             db.execute("INSERT INTO proposal_attempts VALUES(?,?,?,?,?)",
                        (household, agent, period_id, request_key, request_hash))
+            return plan["id"] if plan else None
 
-    def reserve(self, household: str, agent: str, cart: Cart, request_key: str):
+    def reserve(self, household: str, agent: str, cart: Cart, request_key: str, *, expected_plan_id=None):
         if not agent or not request_key or len(request_key) > 128:
             raise Rejection("invalid_request", "Agent and request key are required.")
         cart_json = canonical(cart.as_dict())
@@ -314,6 +335,10 @@ class Ledger:
                     raise Rejection("idempotency_conflict", "This request key belongs to a different cart.")
                 return self._public(old)
             summary = self._summary(db, household)
+            if expected_plan_id is not None and summary.get("plan_id") != expected_plan_id:
+                raise Rejection("plan_not_ready", "The reporting period changed; retry with the same request key.")
+            if "plan_id" in summary and not summary["can_propose"]:
+                raise Rejection("plan_not_ready", "Confirm a funded current financial plan before purchasing.")
             if cart.total_cents > summary["available_cents"]:
                 # No reservation is committed on denial.
                 raise Rejection("budget_exceeded", "The purchase would consume protected or committed money.",
@@ -322,12 +347,13 @@ class Ledger:
                                 maximum_total_cents=summary["available_cents"])
             purchase = str(uuid.uuid4())
             db.execute("""INSERT INTO purchases(id,household,agent,request_key,request_hash,
-                cart_json,cart_hash,amount_cents,state,expires_at,policy_version)
-                VALUES(?,?,?,?,?,?,?,?,'reserved',?,?)""",
+                cart_json,cart_hash,amount_cents,state,expires_at,policy_version,plan_id)
+                VALUES(?,?,?,?,?,?,?,?,'reserved',?,?,?)""",
                        (purchase, household, agent, request_key, cart.cart_hash,
                         cart_json, cart.cart_hash, cart.total_cents,
-                        self.now() + self.ttl_seconds, summary["policy_version"]))
-            self._event(db, purchase, "reserved", amount_cents=cart.total_cents, agent=agent)
+                        self.now() + self.ttl_seconds, summary["policy_version"], summary.get("plan_id")))
+            self._event(db, purchase, "reserved", amount_cents=cart.total_cents, agent=agent,
+                        plan_id=summary.get("plan_id"), policy_version=summary["policy_version"])
             self._summary(db, household)
             return self._public(self._purchase(db, purchase))
 
@@ -361,6 +387,7 @@ class Ledger:
                 failure = Rejection("approval_expired", "Checkout expired. Submit a fresh proposal.")
             else:
                 self._check_cart(row, current_cart)
+                self._check_policy(db, row)
                 if row["state"] not in ("reserved", "approved"):
                     raise Rejection("invalid_state", "Purchase is not awaiting owner approval.")
                 if row["state"] == "reserved":
@@ -420,8 +447,11 @@ class Ledger:
                     raise Rejection("missing_authorization", "PayPal authorization is required.")
                 if action == "authorize" and row["permit_consumed_at"] is not None:
                     raise Rejection("approval_consumed", "This consent already initiated a payment lifecycle.")
+                if action == "authorize":
+                    self._check_policy(db, row)
                 operation = str(uuid.uuid4())
                 intent = {"purchase": purchase, "action": action,
+                          "plan_id": row["plan_id"], "policy_version": row["policy_version"],
                           "cart_hash": row["cart_hash"], "cart": json.loads(row["cart_json"]),
                           "amount_cents": row["amount_cents"], "currency": "USD",
                           "order_id": row["order_id"], "authorization_id": row["authorization_id"]}
@@ -496,7 +526,7 @@ class Ledger:
     def _public(row) -> dict:
         return {k: row[k] for k in ("id", "household", "agent", "cart_hash", "amount_cents",
                                    "state", "expires_at", "policy_version", "order_id",
-                                   "authorization_id", "capture_id")}
+                                   "authorization_id", "capture_id", "plan_id")}
 
     def get(self, purchase: str):
         with self._transaction() as db:

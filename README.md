@@ -4,8 +4,9 @@
 
 This is the first implementation stage: a deterministic ledger, consent engine,
 scoped tool API, PayPal sandbox adapter, and local evaluation harness. It is not
-yet a completed PayPal + AI hackathon submission: real LLM callers, the financial-
-plan layer, a buyer-facing interface, and user validation are outstanding. The core
+yet a completed PayPal + AI hackathon submission: real LLM callers,
+a buyer-facing interface, and user validation are outstanding. The financial-plan
+backend is implemented and locally checked. The core
 payment lifecycle has now been verified against actual PayPal sandbox.
 
 ## Run the local checks
@@ -23,9 +24,9 @@ approval audit. The products and tool callers are simulated. It makes no PayPal
 or LLM requests. Either concurrent request can win; the invariant is independent
 of their execution order.
 
-The recorded evaluation contains **112 cases: 112 passed, 0 skipped, 0 failures,
-0 errors**. Seven checks use actual loopback TCP, including all five originally
-skipped TCP cases and two privacy checks. Seven in-memory checks independently
+The recorded evaluation contains **155 cases: 155 passed, 0 skipped, 0 failures,
+0 errors**. Eight checks use actual loopback TCP, including all five originally
+skipped TCP cases, two privacy checks and the financial-plan route check. Seven in-memory checks independently
 exercise the HTTP handler. The report lists the TCP cases explicitly.
 Payment-adapter checks use handwritten fixtures and four offline regression cases
 replaying sanitized actual sandbox responses. Three process-kill checks
@@ -62,20 +63,40 @@ overcapture allowances were not verified by this run.
 
 ## Ledger and expiry
 
-All money is integer USD cents. The prototype has one fixed planning period and
-one aggregate protected commitment. Bills, savings, and emergency funds can be
-represented in that commitment, but there is no income forecasting or automated
-financial plan import yet.
+All money is integer USD cents. The owner-confirmed calendar-month plan stores
+bills, buffer and a savings goal separately. It protects bills through the later
+of month end and the next expected payday, including bills due on that payday.
+Future income affects a separate forecast and never funds purchases before receipt.
+Missing/overdue income information and month end freeze new purchases. After a
+receipt is fully recorded, the owner confirms the next expected payday to extend
+the horizon. Inputs and external payments remain self-reported, without bank sync.
 
 ```text
-available = budget - protected commitments - captured spending - encumbered purchases
-available >= 0
+cash_base = opening cash + confirmed inflows - recorded external outflows
+protected = unpaid protected bills + buffer + unfulfilled savings contribution
+available = cash_base - protected - captured spending - encumbered purchases
+new reservations require available >= 0
 ```
 
 Each purchase contributes exactly once. Captured spending remains deducted;
 capture moves the purchase from encumbered to spent. Releasing a captured purchase
-would be an accounting error. Refund accounting and period rollover are future
-work.
+would be an accounting error. Actual cash corrections may reveal a deficit;
+display it and block new purchases while retaining payment obligations. Received
+refunds are deduplicated cash credits, not capture reversals. Rollover rebases old
+spend into new opening cash and carries verified authorizations exactly once.
+
+An external bill payment pairs its cash debit with reduced bill protection in one
+transaction. A savings deposit pairs the debit, fulfilled installment and increased
+saved balance; earmarking alone is not a deposit. Financial edits invalidate
+pre-payment approvals but retain authorized purchases' original settlement terms.
+Title-only and expected-income-amount-only edits preserve approvals. In-flight or
+uncertain payments block financial edits; actual cash events can still be recorded.
+
+The 43 new financial checks cover period boundaries, goal arithmetic, paired cash
+events, deficits, privacy, revision/authorization races, rollover and migration
+safety. See [the implemented financial API](docs/FINANCIAL_PLAN_API.md).
+Legacy aggregate-only APIs remain for existing tests; the running server requires
+an explicit owner-confirmed financial plan. No plan is activated automatically.
 
 ```text
 reserved -> approved -> authorizing -> authorized -> capturing -> captured
@@ -113,9 +134,10 @@ voiding, and unresolved purchases remain counted until their outcome is verified
   request keys, retains the key after a simulated lost response, and stops after
   a reservation or exhausted revisions. It is a dispatcher, not a live model runner.
 - The gateway persists a limit of three distinct proposals per agent and trusted
-  prototype period, counting denied proposals too. Same-key/same-cart retries reuse
-  a slot; changing a cart under that key is rejected. The period currently has a
-  fixed prototype ID; real calendar-period integration awaits the financial layer.
+  planning period, counting denied proposals too. Same-key/same-cart retries reuse
+  a slot; changing a cart under that key is rejected. Confirmed plans supply the
+  period ID, including a check against rollover between quota and reservation.
+  Legacy aggregate-only test scenarios retain a fixed prototype ID.
 - Counteroffers expose at most one inexpensive feasible catalog alternative, not
   exact remaining capacity. Decision outcomes and the optional headroom floor still
   leak information. Caps are not a privacy guarantee and may block legitimate work.
@@ -147,7 +169,7 @@ python3 server.py --port 8765
 
 The server binds only to `127.0.0.1`. It stores runtime state in a private,
 project-specific temporary directory outside the source repository, generates
-three scoped tokens, and creates a $600 budget with $250 protected. Its signing
+three scoped tokens, and creates a bootstrap household requiring plan setup. Its signing
 key is a separate file with mode `0600`, not a database setting. The server rejects
 a `--state-dir` inside the source repository. For persistent demo state, supply an
 external directory explicitly; temporary state can be cleaned by the operating
@@ -160,6 +182,11 @@ Every request requires `Authorization: Bearer <scoped token>`.
 |---|---|---|
 | `GET /v1/catalog` | Agent or owner | None |
 | `GET /v1/budget` | Owner full view; agent coarse floor | None |
+| `GET /v1/plan` | Owner | None |
+| `POST /v1/plan/preview` | Owner | `plan`, `mode` |
+| `POST /v1/plan/confirm` | Owner | `plan`, `mode`, `preview_hash` |
+| `POST /v1/plan/cash-events` | Owner | `event_id`, `kind`, `amount_cents`, `reference_id` |
+| `GET /v1/plan/audit` | Owner | None |
 | `POST /v1/proposals` | Agent | `items`, `request_key` |
 | `GET /v1/purchases/{id}` | Proposing agent or owner | None |
 | `GET /v1/purchases/{id}/audit` | Owner | None |
@@ -219,7 +246,8 @@ Use sandbox business credentials and that business's sandbox merchant ID. The
 adapter has a fixed sandbox URL and cannot target live PayPal.
 See [PAYPAL_SETUP.md](PAYPAL_SETUP.md) for where to get these credentials.
 
-1. Submit a proposal with an agent token.
+1. Preview and confirm a financial plan with the owner token using the documented
+   plan API, then submit a proposal with an agent token.
 2. Inspect its cart and approve its hash with the owner token. Save the returned
    permit in the owner workflow, never the agent context.
 3. Call `checkout`; open its PayPal buyer-approval URL and log in as a sandbox
@@ -265,8 +293,8 @@ The local foundation is implemented. The remaining demo work is:
 5. Conduct five user conversations; record quotes only with consent.
 
 Exclude model payment authority, real retailer coverage, forecasting, automatic
-renewal interception, elaborate revocation, marketplace settlement, refund
-accounting, and sophisticated policy migrations from this prototype.
+renewal interception, elaborate revocation, marketplace settlement, automatic
+refund processing, and sophisticated policy migrations from this prototype.
 
 This repository is ready to continue locally. It has not been published, hosted,
 or submitted to the hackathon.

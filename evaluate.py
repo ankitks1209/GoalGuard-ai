@@ -30,7 +30,7 @@ def main():
     original_tcp = ["test_unauthenticated_client_is_denied", "test_two_scoped_http_clients_share_one_budget",
                     "test_agent_http_token_cannot_approve", "test_owner_http_approval_and_agent_read_hide_permission",
                     "test_missing_paypal_is_labeled"]
-    tcp_passed = [name for name in result.passed_ids if ".HTTPTests." in name]
+    tcp_passed = [name for name in result.passed_ids if ".HTTPTests." in name or ".PlanHTTPTests." in name]
     original_tcp_passed = [name for name in tcp_passed if name.rsplit(".", 1)[-1] in original_tcp]
     report = {
         "kind": "local_deterministic_enforcement",

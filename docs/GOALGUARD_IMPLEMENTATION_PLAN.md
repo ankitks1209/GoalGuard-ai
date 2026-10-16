@@ -3,8 +3,12 @@
 **Status (17 October 2026):** core sandbox gate passed without fallback. Actual
 authorize/capture, authorize/void, same-key replay, controlled response-loss
 recovery and local amount guard are recorded in `sandbox-results.json` and
-`SANDBOX_VERIFICATION.md`. Broader product implementation remains paused. When
-resumed, the next milestone is the financial-plan layer, not another design round.
+`SANDBOX_VERIFICATION.md`. The user resumed implementation. The core financial-plan
+backend is implemented with 43 new local cases; the complete suite has 155 passes,
+zero skips and eight TCP cases. The next milestone is connecting real agents,
+pending model access. The owner interface and natural-language drafting remain
+unfinished. Provider final-failure classifications without supporting evidence
+remain conservatively pending; that follow-up is not claimed complete.
 **Companion:** [GOALGUARD_BLUEPRINT.md](GOALGUARD_BLUEPRINT.md).
 
 ## Build order
@@ -74,6 +78,17 @@ behavior from documented honor-period/expiry rules.
 **Estimate:** 1–2 focused engineering days after credentials are ready.
 
 ## Milestone 2 — align the financial plan and ledger
+
+**Implemented:** calendar-month plans, named bills/buffer/goal, future bill horizon,
+forecast separation, owner preview/confirmation, off-track goal schedules, paired
+cash records, bounded financial revisions, approval invalidation, authorized
+obligation preservation, received refunds and owner-confirmed rollover. See
+`FINANCIAL_PLAN_API.md` and `tests/test_plans.py`. Local scope is verified; this
+financial integration has not yet been run through a new actual sandbox lifecycle.
+
+**Clarification from implementation review:** after the expected income is fully
+recorded as received, require the next expected payday before new purchases. This
+prevents a stale received payday from shortening future bill protection.
 
 **Work:** add calendar-month reporting and the bill protection cutoff extending
 through the next expected income date, plus structured bill/buffer/goal records,

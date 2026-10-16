@@ -1,9 +1,11 @@
 # GoalGuard — product and architecture blueprint
 
-**Status (17 October 2026):** core sandbox lifecycle passed; broader product
-implementation remains paused. See `SANDBOX_VERIFICATION.md` and
-`sandbox-results.json` for observed scope. Financial-plan semantics below remain
-requirements until implemented and verified.
+**Status (17 October 2026):** core sandbox lifecycle passed. The user resumed the
+build; the financial-plan backend is implemented and locally verified in 43 new
+cases. The full report has 155 passes, eight TCP cases and zero skips. See
+`FINANCIAL_PLAN_API.md` for the actual owner API. Real models, natural-language
+drafting and the owner interface remain unfinished. Sandbox observations remain
+separate in `SANDBOX_VERIFICATION.md` and `sandbox-results.json`.
 **Prepared:** 15 October 2026.
 **Source project:** `/Users/golukakarot/Developer/Projects/GoalGuard-ai`.
 
@@ -88,6 +90,9 @@ clarification before enabling purchases. If the date passes without confirmed
 receipt, freeze new reservations until the owner confirms receipt or revises the
 date and resulting protection horizon. Expected receipts are a planning assumption,
 not a guarantee of bill payment or coverage of unreported commitments.
+After a receipt is fully recorded, the implemented MVP requires owner confirmation
+of the next expected payday before enabling new purchases; a received payday must
+not remain the horizon for future bills.
 Any overdue unpaid bills must be explicitly included as carry-in commitments
 before activation; they cannot disappear because their due dates have passed.
 The prototype demonstrates one period; rollover is an owner-confirmed next-period
@@ -360,9 +365,12 @@ server actions; PayPal separately obtains buyer payment approval.
 | Payment operation | Durable ID, action, intent snapshot, provider IDs, status and verified result |
 | Audit event | Sequence, purchase/plan reference, actor, event, timestamp and redacted details |
 
-The spike currently implements a household-level aggregate, purchases, operations
-and events. Plan, commitment and goal records are proposed additions. Signed
-approval and external key storage can be retained after review.
+The backend now implements financial plan records, separate bill/goal records,
+buffer in the plan, cash events, drafts and owner audit alongside purchases and
+payment operations. Purchases reference the active plan; rollover carries verified
+authorizations with explicit audit links. The old aggregate remains for legacy
+tests, while the running server requires a confirmed financial plan. Signed
+approval and external key storage are retained without rotating existing keys.
 
 ## 7. API and authority contracts
 
@@ -619,8 +627,8 @@ code retain financial authority even when a model ignores that guidance.
 ## 10. Evaluation and evidence
 
 Keep three evidence categories visible: verified locally, simulated-provider
-fixtures, and actual sandbox/model observations. The current report contains 112
-passing local cases with zero skips, including seven actual TCP cases, handwritten
+fixtures, and actual sandbox/model observations. The current report contains 155
+passing local cases with zero skips, including eight actual TCP cases, handwritten
 payment/process-kill fixtures and four offline recorded-response regressions.
 Actual PayPal sandbox outcomes are recorded separately in `sandbox-results.json`;
 real LLM outcomes remain absent. Do not add provider response counts to test counts.
@@ -656,7 +664,8 @@ missing/late income dates, atomic savings-deposit pairing, edits during verified
 authorization versus uncertain calls, capture after a policy change, refund
 deduplication, rollover with a carried authorization, partial-month activation
 and privacy allowlists across every agent response. These are acceptance cases
-to implement; no passing result is claimed yet.
+implemented in the 43-case financial suite. Passing local cases do not establish
+live-model behavior or an additional real sandbox run.
 Acceptance cases cover simultaneous requests to one DB file, duplicate keys,
 changed cart/total, injected descriptions, exact TTL boundary, cancelled consent,
 process death before ledger completion, and provider refresh without double spend.
@@ -683,7 +692,7 @@ source checkout; an OS temporary directory is for disposable rehearsals only.
 
 | Area | Existing evidence | Blueprint gap |
 |---|---|---|
-| Ledger | Local transaction, concurrency, expiry and captured-spending cases pass | Structured plans, bill horizon, paired cash events, revisions and rollover semantics |
+| Ledger | Structured plans, bill horizon, paired cash events, revisions and rollover pass local cases alongside existing payment controls | Owner UI, natural-language draft helper, additional verified provider failure classifications |
 | Consent | Cart binding, signatures and initiation consumption tested | Owner session UI and merchant fulfilment role |
 | PayPal | Actual authorize/capture and authorize/void, exact $1, same-key capture replay; 29 sanitized responses | Honor period, long-duration expiry and production behavior unverified |
 | Recovery | Real status refresh recovered a deliberately suppressed authorization reply; simulated-provider process-kill tests also pass | Natural timeout and real-provider process-kill behavior unverified |
@@ -713,8 +722,8 @@ Timebox architecture review to 30 minutes: financial semantics, interface, then
 milestone order. Use the written defaults for remaining routine choices at the
 end; record genuinely unresolved dependencies. Do not begin another design round
 before the sandbox check. Sandbox credentials are configured and its core lifecycle
-is verified. Broader product implementation remains paused at the user's request;
-the next implementation milestone, when resumed, is the financial-plan layer.
+is verified. The user resumed the build and the core financial-plan layer is now
+implemented. The next milestone is real model callers, requiring model access.
 
 See [GOALGUARD_IMPLEMENTATION_PLAN.md](GOALGUARD_IMPLEMENTATION_PLAN.md) for the
 milestones, dependencies and completion gates.

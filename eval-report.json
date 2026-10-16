@@ -1,12 +1,12 @@
 {
   "kind": "local_deterministic_enforcement",
-  "test_cases": 112,
-  "run": 112,
-  "passed": 112,
+  "test_cases": 155,
+  "run": 155,
+  "passed": 155,
   "failures": 0,
   "errors": 0,
   "skipped": 0,
-  "tcp_passed": 7,
+  "tcp_passed": 8,
   "tcp_passed_cases": [
     "test_gateway.HTTPTests.test_agent_http_denials_and_errors_drop_private_details",
     "test_gateway.HTTPTests.test_agent_http_token_cannot_approve",
@@ -14,11 +14,12 @@
     "test_gateway.HTTPTests.test_missing_paypal_is_labeled",
     "test_gateway.HTTPTests.test_owner_http_approval_and_agent_read_hide_permission",
     "test_gateway.HTTPTests.test_two_scoped_http_clients_share_one_budget",
-    "test_gateway.HTTPTests.test_unauthenticated_client_is_denied"
+    "test_gateway.HTTPTests.test_unauthenticated_client_is_denied",
+    "test_plans.PlanHTTPTests.test_owner_plan_routes_and_agent_denial_over_tcp"
   ],
   "original_five_tcp_passed": true,
   "skipped_cases": [],
-  "seconds": 1.49,
+  "seconds": 2.69,
   "python": "3.14.7",
   "live_paypal": "not_run_by_this_suite",
   "separate_sandbox_evidence": "docs/sandbox-results.json",

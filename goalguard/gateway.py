@@ -6,6 +6,7 @@ from .catalog import Catalog, stored_cart
 from .ledger import Ledger, Rejection
 from .paypal import PaymentUnavailable, money_matches
 from .agent_view import agent_view
+from .plans import FinancialPlans
 
 
 @dataclass(frozen=True)
@@ -17,7 +18,7 @@ class Principal:
 
 class Gateway:
     def __init__(self, ledger: Ledger, catalog: Catalog, paypal=None, *,
-                 period_id="prototype-period", proposal_limit=3):
+                 period_id="prototype-period", proposal_limit=3, require_plan=False):
         if not isinstance(period_id, str) or not period_id or type(proposal_limit) is not int or proposal_limit < 1:
             raise ValueError("A trusted period ID and positive proposal limit are required.")
         self.ledger = ledger
@@ -25,13 +26,40 @@ class Gateway:
         self.paypal = paypal
         self.period_id = period_id
         self.proposal_limit = proposal_limit
+        self.require_plan = require_plan
+        self.plans = FinancialPlans(ledger)
+
+    @staticmethod
+    def _owner(principal):
+        if principal.role != "owner":
+            raise Rejection("forbidden", "Financial plans and cash records are owner-only.")
+
+    def plan(self, principal, action="get", body=None):
+        self._owner(principal)
+        if action == "get":
+            return self.plans.get(principal.household)
+        if action == "audit":
+            return self.plans.audit(principal.household)
+        from .finance import fields
+        if action == "preview":
+            fields(body, {"plan", "mode"})
+            return self.plans.preview(principal.household, body["plan"], body["mode"])
+        if action == "confirm":
+            fields(body, {"plan", "mode", "preview_hash"})
+            return self.plans.confirm(principal.household, body["plan"], body["mode"], body["preview_hash"])
+        if action == "cash-events":
+            return self.plans.cash_event(principal.household, body)
+        raise Rejection("not_found", "Unknown plan action.")
 
     def budget(self, principal):
         summary = self.ledger.summary(principal.household)
         if principal.role == "owner":
             return summary
         # Optional legacy endpoint: a conservative $50 floor, never exact headroom.
-        return {"currency": "USD", "headroom_floor_cents": summary["available_cents"] // 5000 * 5000}
+        available = summary["available_cents"] if summary.get("can_propose", True) else 0
+        if self.require_plan and "plan_id" not in summary:
+            available = 0
+        return {"currency": "USD", "headroom_floor_cents": max(0, available) // 5000 * 5000}
 
     def audit(self, principal, purchase):
         self._purchase(principal, purchase, owner=True)
@@ -51,11 +79,14 @@ class Gateway:
             raise Rejection("forbidden", "Use an agent token to propose a purchase.")
         if set(body) != {"items", "request_key"} or not isinstance(body["request_key"], str):
             raise Rejection("invalid_proposal", "Provide only items and request_key.")
+        if self.require_plan and self.plans.get(principal.household)["plan"] is None:
+            raise Rejection("plan_required", "The owner must confirm a financial plan first.")
         cart = self.catalog.quote(body["items"])
-        self.ledger.claim_proposal(principal.household, principal.identity, self.period_id,
-                                   body["request_key"], cart.cart_hash, self.proposal_limit)
+        counted_plan = self.ledger.claim_proposal(principal.household, principal.identity, self.period_id,
+                                                 body["request_key"], cart.cart_hash, self.proposal_limit)
         try:
-            purchase = self.ledger.reserve(principal.household, principal.identity, cart, body["request_key"])
+            purchase = self.ledger.reserve(principal.household, principal.identity, cart, body["request_key"],
+                                           expected_plan_id=counted_plan)
             return agent_view({"decision": purchase["state"], "purchase": purchase})
         except Rejection as error:
             if error.code != "budget_exceeded":

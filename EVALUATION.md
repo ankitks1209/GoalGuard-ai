@@ -22,10 +22,28 @@ cases and denominators. Do not claim universal safety from a finite passing suit
 
 ## Stronger LLM baseline: pending
 
-The current local report has 112 passing cases, zero skips and seven actual TCP
+The current local report has 155 passing cases, zero skips and eight actual TCP
 cases. It explicitly confirms all five original TCP tests passed. Run
 `python3 evaluate.py --report eval-report.json --require-tcp` to require their
 success; in-memory handler tests do not satisfy that condition.
+
+## Financial-plan evidence
+
+43 new cases in `tests/test_plans.py` exercise owner preview/confirmation, separately
+stored bills/buffer/goal, month-end rent protection, payday/overdue bill boundaries,
+forecast exclusion from purchase authority, zero/negative capacity, missing and
+late income, refreshing a received payday's future horizon, full partial-month
+contributions, exact cents, paired bill/savings events, duplicate events, received
+refunds, approval invalidation, harmless edits, revision/authorization races,
+shared-file concurrency, timezone boundaries, rollover, quota-period binding,
+legacy migration refusal and persistence without key rotation.
+One of those cases uses real TCP for owner plan routes and agent refusal. Provider
+settlement in financial cases is a trusted fixture result, not a new live PayPal
+run. The previous sandbox evidence remains separate and unchanged.
+
+Finite local coverage does not establish production readiness or model behavior.
+Natural-language plan drafting, the owner interface, real-agent integration and
+unverified provider final-failure classifications remain unfinished.
 
 ## Agent-boundary and probing evidence
 

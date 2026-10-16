@@ -6,7 +6,7 @@ REASONS = {"budget_exceeded", "proposal_limit", "forbidden", "unauthorized", "no
            "invalid_body", "invalid_proposal", "invalid_cart", "invalid_request", "invalid_money",
            "unknown_product", "unknown_purchase", "unknown_operation", "unknown_household",
            "idempotency_conflict", "cart_changed", "invalid_state", "expired", "request_rejected",
-           "internal_error", "payment_unavailable"}
+           "internal_error", "payment_unavailable", "plan_required", "plan_not_ready", "policy_changed"}
 
 
 def purchase_view(row):
