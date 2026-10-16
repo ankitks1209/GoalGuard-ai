@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.env
+state/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+tokens.json
+*.signing-key
+.DS_Store

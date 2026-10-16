@@ -1,0 +1,14 @@
+{
+  "status": "not_run_with_live_models",
+  "incumbent": "shopping-agent.txt",
+  "bounds": {"maximum_tool_calls": 8, "maximum_revised_proposals": 1},
+  "variants": [
+    {"name": "incumbent", "change": "none"},
+    {"name": "minimal", "change": "Keep task, tool availability, owner authority boundary and exit criteria; remove explanatory hints."},
+    {"name": "without_recovery_hint", "change": "Remove explicit counteroffer advice while keeping task and authority boundary."},
+    {"name": "optional_coarse_headroom", "change": "Compare optional coarse headroom inspection with denial-only recovery under identical restricted tool permissions; never expose private plan fields."}
+  ],
+  "fixed_conditions": ["catalog", "budget", "tools", "request schedule", "scenario cases", "model parameters"],
+  "measurements": ["accepted_policy_violations", "legitimate_completion", "false_denials", "feasible_recovery", "latency", "token_usage"],
+  "adoption_rule": "Adopt simpler prompts only after measured comparison. Keep raw successes and failures. Never remove deterministic payment controls as a prompt ablation."
+}

@@ -1,0 +1,901 @@
+{
+  "kind": "synthetic_deterministic_budget_probing",
+  "live_llm": "not_run",
+  "live_paypal": "not_run",
+  "scenarios": 1,
+  "synthetic_capacities": 10,
+  "repetitions_per_capacity_and_configuration": 1,
+  "runs": 20,
+  "quota_bypasses": 0,
+  "capped_exact_recoveries": 0,
+  "control_exact_recoveries": 10,
+  "limitations": [
+    "One deliberately fine-grained catalog, known 0\u2013100 cent domain, deterministic attacker.",
+    "Accepted reservations stay counted; attacker does not cancel or reset the ledger.",
+    "Decision outcomes and counteroffers still leak feasibility; proposal caps do not guarantee privacy.",
+    "Multiple authorized agents can combine observations; quotas can also block legitimate fourth proposals.",
+    "Gateway period is a trusted fixed prototype ID until the financial-plan layer supplies real periods."
+  ],
+  "results": [
+    {
+      "synthetic_headroom_cents": 11,
+      "proposal_limit": 3,
+      "initial_candidate_interval_cents": [
+        0,
+        100
+      ],
+      "recovered_interval_cents": [
+        0,
+        11
+      ],
+      "exact_recovery": false,
+      "evaluated_proposals": 3,
+      "blocked_by_quota": true,
+      "transcript": [
+        {
+          "requested_cents": 50,
+          "decision": "denied",
+          "reason": "budget_exceeded"
+        },
+        {
+          "requested_cents": 25,
+          "decision": "denied",
+          "reason": "budget_exceeded"
+        },
+        {
+          "requested_cents": 12,
+          "decision": "denied",
+          "reason": "budget_exceeded"
+        },
+        {
+          "requested_cents": 6,
+          "decision": "denied",
+          "reason": "proposal_limit"
+        }
+      ]
+    },
+    {
+      "synthetic_headroom_cents": 23,
+      "proposal_limit": 3,
+      "initial_candidate_interval_cents": [
+        0,
+        100
+      ],
+      "recovered_interval_cents": [
+        12,
+        24
+      ],
+      "exact_recovery": false,
+      "evaluated_proposals": 3,
+      "blocked_by_quota": true,
+      "transcript": [
+        {
+          "requested_cents": 50,
+          "decision": "denied",
+          "reason": "budget_exceeded"
+        },
+        {
+          "requested_cents": 25,
+          "decision": "denied",
+          "reason": "budget_exceeded"
+        },
+        {
+          "requested_cents": 12,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 6,
+          "decision": "denied",
+          "reason": "proposal_limit"
+        }
+      ]
+    },
+    {
+      "synthetic_headroom_cents": 37,
+      "proposal_limit": 3,
+      "initial_candidate_interval_cents": [
+        0,
+        100
+      ],
+      "recovered_interval_cents": [
+        37,
+        49
+      ],
+      "exact_recovery": false,
+      "evaluated_proposals": 3,
+      "blocked_by_quota": true,
+      "transcript": [
+        {
+          "requested_cents": 50,
+          "decision": "denied",
+          "reason": "budget_exceeded"
+        },
+        {
+          "requested_cents": 25,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 12,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 6,
+          "decision": "denied",
+          "reason": "proposal_limit"
+        }
+      ]
+    },
+    {
+      "synthetic_headroom_cents": 49,
+      "proposal_limit": 3,
+      "initial_candidate_interval_cents": [
+        0,
+        100
+      ],
+      "recovered_interval_cents": [
+        37,
+        49
+      ],
+      "exact_recovery": false,
+      "evaluated_proposals": 3,
+      "blocked_by_quota": true,
+      "transcript": [
+        {
+          "requested_cents": 50,
+          "decision": "denied",
+          "reason": "budget_exceeded"
+        },
+        {
+          "requested_cents": 25,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 12,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 6,
+          "decision": "denied",
+          "reason": "proposal_limit"
+        }
+      ]
+    },
+    {
+      "synthetic_headroom_cents": 50,
+      "proposal_limit": 3,
+      "initial_candidate_interval_cents": [
+        0,
+        100
+      ],
+      "recovered_interval_cents": [
+        50,
+        61
+      ],
+      "exact_recovery": false,
+      "evaluated_proposals": 3,
+      "blocked_by_quota": true,
+      "transcript": [
+        {
+          "requested_cents": 50,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 25,
+          "decision": "denied",
+          "reason": "budget_exceeded"
+        },
+        {
+          "requested_cents": 12,
+          "decision": "denied",
+          "reason": "budget_exceeded"
+        },
+        {
+          "requested_cents": 6,
+          "decision": "denied",
+          "reason": "proposal_limit"
+        }
+      ]
+    },
+    {
+      "synthetic_headroom_cents": 61,
+      "proposal_limit": 3,
+      "initial_candidate_interval_cents": [
+        0,
+        100
+      ],
+      "recovered_interval_cents": [
+        50,
+        61
+      ],
+      "exact_recovery": false,
+      "evaluated_proposals": 3,
+      "blocked_by_quota": true,
+      "transcript": [
+        {
+          "requested_cents": 50,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 25,
+          "decision": "denied",
+          "reason": "budget_exceeded"
+        },
+        {
+          "requested_cents": 12,
+          "decision": "denied",
+          "reason": "budget_exceeded"
+        },
+        {
+          "requested_cents": 6,
+          "decision": "denied",
+          "reason": "proposal_limit"
+        }
+      ]
+    },
+    {
+      "synthetic_headroom_cents": 73,
+      "proposal_limit": 3,
+      "initial_candidate_interval_cents": [
+        0,
+        100
+      ],
+      "recovered_interval_cents": [
+        62,
+        74
+      ],
+      "exact_recovery": false,
+      "evaluated_proposals": 3,
+      "blocked_by_quota": true,
+      "transcript": [
+        {
+          "requested_cents": 50,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 25,
+          "decision": "denied",
+          "reason": "budget_exceeded"
+        },
+        {
+          "requested_cents": 12,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 6,
+          "decision": "denied",
+          "reason": "proposal_limit"
+        }
+      ]
+    },
+    {
+      "synthetic_headroom_cents": 87,
+      "proposal_limit": 3,
+      "initial_candidate_interval_cents": [
+        0,
+        100
+      ],
+      "recovered_interval_cents": [
+        75,
+        87
+      ],
+      "exact_recovery": false,
+      "evaluated_proposals": 3,
+      "blocked_by_quota": true,
+      "transcript": [
+        {
+          "requested_cents": 50,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 25,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 13,
+          "decision": "denied",
+          "reason": "budget_exceeded"
+        },
+        {
+          "requested_cents": 6,
+          "decision": "denied",
+          "reason": "proposal_limit"
+        }
+      ]
+    },
+    {
+      "synthetic_headroom_cents": 95,
+      "proposal_limit": 3,
+      "initial_candidate_interval_cents": [
+        0,
+        100
+      ],
+      "recovered_interval_cents": [
+        88,
+        100
+      ],
+      "exact_recovery": false,
+      "evaluated_proposals": 3,
+      "blocked_by_quota": true,
+      "transcript": [
+        {
+          "requested_cents": 50,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 25,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 13,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 6,
+          "decision": "denied",
+          "reason": "proposal_limit"
+        }
+      ]
+    },
+    {
+      "synthetic_headroom_cents": 99,
+      "proposal_limit": 3,
+      "initial_candidate_interval_cents": [
+        0,
+        100
+      ],
+      "recovered_interval_cents": [
+        88,
+        100
+      ],
+      "exact_recovery": false,
+      "evaluated_proposals": 3,
+      "blocked_by_quota": true,
+      "transcript": [
+        {
+          "requested_cents": 50,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 25,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 13,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 6,
+          "decision": "denied",
+          "reason": "proposal_limit"
+        }
+      ]
+    },
+    {
+      "synthetic_headroom_cents": 11,
+      "proposal_limit": 32,
+      "initial_candidate_interval_cents": [
+        0,
+        100
+      ],
+      "recovered_interval_cents": [
+        11,
+        11
+      ],
+      "exact_recovery": true,
+      "evaluated_proposals": 7,
+      "blocked_by_quota": false,
+      "transcript": [
+        {
+          "requested_cents": 50,
+          "decision": "denied",
+          "reason": "budget_exceeded"
+        },
+        {
+          "requested_cents": 25,
+          "decision": "denied",
+          "reason": "budget_exceeded"
+        },
+        {
+          "requested_cents": 12,
+          "decision": "denied",
+          "reason": "budget_exceeded"
+        },
+        {
+          "requested_cents": 6,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 3,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 1,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 1,
+          "decision": "reserved",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "synthetic_headroom_cents": 23,
+      "proposal_limit": 32,
+      "initial_candidate_interval_cents": [
+        0,
+        100
+      ],
+      "recovered_interval_cents": [
+        23,
+        23
+      ],
+      "exact_recovery": true,
+      "evaluated_proposals": 7,
+      "blocked_by_quota": false,
+      "transcript": [
+        {
+          "requested_cents": 50,
+          "decision": "denied",
+          "reason": "budget_exceeded"
+        },
+        {
+          "requested_cents": 25,
+          "decision": "denied",
+          "reason": "budget_exceeded"
+        },
+        {
+          "requested_cents": 12,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 6,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 3,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 2,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 1,
+          "decision": "denied",
+          "reason": "budget_exceeded"
+        }
+      ]
+    },
+    {
+      "synthetic_headroom_cents": 37,
+      "proposal_limit": 32,
+      "initial_candidate_interval_cents": [
+        0,
+        100
+      ],
+      "recovered_interval_cents": [
+        37,
+        37
+      ],
+      "exact_recovery": true,
+      "evaluated_proposals": 6,
+      "blocked_by_quota": false,
+      "transcript": [
+        {
+          "requested_cents": 50,
+          "decision": "denied",
+          "reason": "budget_exceeded"
+        },
+        {
+          "requested_cents": 25,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 12,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 6,
+          "decision": "denied",
+          "reason": "budget_exceeded"
+        },
+        {
+          "requested_cents": 3,
+          "decision": "denied",
+          "reason": "budget_exceeded"
+        },
+        {
+          "requested_cents": 1,
+          "decision": "denied",
+          "reason": "budget_exceeded"
+        }
+      ]
+    },
+    {
+      "synthetic_headroom_cents": 49,
+      "proposal_limit": 32,
+      "initial_candidate_interval_cents": [
+        0,
+        100
+      ],
+      "recovered_interval_cents": [
+        49,
+        49
+      ],
+      "exact_recovery": true,
+      "evaluated_proposals": 7,
+      "blocked_by_quota": false,
+      "transcript": [
+        {
+          "requested_cents": 50,
+          "decision": "denied",
+          "reason": "budget_exceeded"
+        },
+        {
+          "requested_cents": 25,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 12,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 6,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 3,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 2,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 1,
+          "decision": "reserved",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "synthetic_headroom_cents": 50,
+      "proposal_limit": 32,
+      "initial_candidate_interval_cents": [
+        0,
+        100
+      ],
+      "recovered_interval_cents": [
+        50,
+        50
+      ],
+      "exact_recovery": true,
+      "evaluated_proposals": 6,
+      "blocked_by_quota": false,
+      "transcript": [
+        {
+          "requested_cents": 50,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 25,
+          "decision": "denied",
+          "reason": "budget_exceeded"
+        },
+        {
+          "requested_cents": 12,
+          "decision": "denied",
+          "reason": "budget_exceeded"
+        },
+        {
+          "requested_cents": 6,
+          "decision": "denied",
+          "reason": "budget_exceeded"
+        },
+        {
+          "requested_cents": 3,
+          "decision": "denied",
+          "reason": "budget_exceeded"
+        },
+        {
+          "requested_cents": 1,
+          "decision": "denied",
+          "reason": "budget_exceeded"
+        }
+      ]
+    },
+    {
+      "synthetic_headroom_cents": 61,
+      "proposal_limit": 32,
+      "initial_candidate_interval_cents": [
+        0,
+        100
+      ],
+      "recovered_interval_cents": [
+        61,
+        61
+      ],
+      "exact_recovery": true,
+      "evaluated_proposals": 7,
+      "blocked_by_quota": false,
+      "transcript": [
+        {
+          "requested_cents": 50,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 25,
+          "decision": "denied",
+          "reason": "budget_exceeded"
+        },
+        {
+          "requested_cents": 12,
+          "decision": "denied",
+          "reason": "budget_exceeded"
+        },
+        {
+          "requested_cents": 6,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 3,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 1,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 1,
+          "decision": "reserved",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "synthetic_headroom_cents": 73,
+      "proposal_limit": 32,
+      "initial_candidate_interval_cents": [
+        0,
+        100
+      ],
+      "recovered_interval_cents": [
+        73,
+        73
+      ],
+      "exact_recovery": true,
+      "evaluated_proposals": 7,
+      "blocked_by_quota": false,
+      "transcript": [
+        {
+          "requested_cents": 50,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 25,
+          "decision": "denied",
+          "reason": "budget_exceeded"
+        },
+        {
+          "requested_cents": 12,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 6,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 3,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 2,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 1,
+          "decision": "denied",
+          "reason": "budget_exceeded"
+        }
+      ]
+    },
+    {
+      "synthetic_headroom_cents": 87,
+      "proposal_limit": 32,
+      "initial_candidate_interval_cents": [
+        0,
+        100
+      ],
+      "recovered_interval_cents": [
+        87,
+        87
+      ],
+      "exact_recovery": true,
+      "evaluated_proposals": 7,
+      "blocked_by_quota": false,
+      "transcript": [
+        {
+          "requested_cents": 50,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 25,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 13,
+          "decision": "denied",
+          "reason": "budget_exceeded"
+        },
+        {
+          "requested_cents": 6,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 3,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 2,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 1,
+          "decision": "reserved",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "synthetic_headroom_cents": 95,
+      "proposal_limit": 32,
+      "initial_candidate_interval_cents": [
+        0,
+        100
+      ],
+      "recovered_interval_cents": [
+        95,
+        95
+      ],
+      "exact_recovery": true,
+      "evaluated_proposals": 7,
+      "blocked_by_quota": false,
+      "transcript": [
+        {
+          "requested_cents": 50,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 25,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 13,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 6,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 3,
+          "decision": "denied",
+          "reason": "budget_exceeded"
+        },
+        {
+          "requested_cents": 1,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 1,
+          "decision": "denied",
+          "reason": "budget_exceeded"
+        }
+      ]
+    },
+    {
+      "synthetic_headroom_cents": 99,
+      "proposal_limit": 32,
+      "initial_candidate_interval_cents": [
+        0,
+        100
+      ],
+      "recovered_interval_cents": [
+        99,
+        99
+      ],
+      "exact_recovery": true,
+      "evaluated_proposals": 7,
+      "blocked_by_quota": false,
+      "transcript": [
+        {
+          "requested_cents": 50,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 25,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 13,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 6,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 3,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 2,
+          "decision": "reserved",
+          "reason": null
+        },
+        {
+          "requested_cents": 1,
+          "decision": "denied",
+          "reason": "budget_exceeded"
+        }
+      ]
+    }
+  ]
+}

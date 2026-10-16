@@ -1,0 +1,66 @@
+{
+  "observed_at_utc": "2026-10-16T20:36:16.522233+00:00",
+  "environment": "paypal_sandbox",
+  "method": "POST",
+  "path": "/v2/payments/authorizations/resource-9/capture",
+  "http_status": 201,
+  "request_id": "resource-10",
+  "request": {
+    "amount": {
+      "currency_code": "USD",
+      "value": "1.00"
+    },
+    "final_capture": true
+  },
+  "response": {
+    "id": "resource-11",
+    "amount": {
+      "currency_code": "USD",
+      "value": "1.00"
+    },
+    "final_capture": true,
+    "seller_protection": {
+      "status": "ELIGIBLE",
+      "dispute_categories": [
+        "ITEM_NOT_RECEIVED",
+        "UNAUTHORIZED_TRANSACTION"
+      ]
+    },
+    "seller_receivable_breakdown": {
+      "gross_amount": {
+        "currency_code": "USD",
+        "value": "1.00"
+      },
+      "paypal_fee": {
+        "currency_code": "USD",
+        "value": "0.40"
+      },
+      "net_amount": {
+        "currency_code": "USD",
+        "value": "0.60"
+      },
+      "exchange_rate": {}
+    },
+    "custom_id": "resource-6",
+    "status": "COMPLETED",
+    "create_time": "2026-10-16T20:36:15Z",
+    "update_time": "2026-10-16T20:36:15Z",
+    "links": [
+      {
+        "href": "https://api.sandbox.paypal.com/v2/payments/captures/resource-11",
+        "rel": "self",
+        "method": "GET"
+      },
+      {
+        "href": "https://api.sandbox.paypal.com/v2/payments/captures/resource-11/refund",
+        "rel": "refund",
+        "method": "POST"
+      },
+      {
+        "href": "https://api.sandbox.paypal.com/v2/payments/authorizations/resource-9",
+        "rel": "up",
+        "method": "GET"
+      }
+    ]
+  }
+}

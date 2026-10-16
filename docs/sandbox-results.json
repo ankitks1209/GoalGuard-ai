@@ -1,0 +1,35 @@
+{
+  "environment": "paypal_sandbox",
+  "gate_status": "passed_core_lifecycle",
+  "observed_at_local_date": "2026-10-17",
+  "timezone": "Asia/Kolkata",
+  "fallback_used": false,
+  "sanitized_provider_response_count": 29,
+  "amount": "1.00",
+  "currency": "USD",
+  "observations": {
+    "token_fetch": {"result": "passed", "http_status": 200, "credentials_or_tokens_published": false},
+    "create_authorize_order": {"result": "passed", "http_status": 200, "provider_status": "PAYER_ACTION_REQUIRED"},
+    "buyer_approval": {"result": "passed", "provider_status": "APPROVED", "source": "GET order details, not redirect parameters"},
+    "authorization": {"result": "passed", "http_status": 201, "authorization_status": "CREATED"},
+    "capture": {"result": "passed", "http_status": 201, "capture_status": "COMPLETED", "spent_cents": 100, "encumbered_cents": 0},
+    "provider_same_key_retry": {"result": "passed", "http_status": 200, "same_capture_id": true, "exact_approved_amount": true},
+    "gateway_cached_retry": {"result": "passed", "additional_provider_calls": 0},
+    "void": {"result": "passed", "http_status": 200, "provider_status": "VOIDED", "confirmed_by_get": true, "spent_cents": 0, "encumbered_cents": 0, "available_cents": 1000},
+    "overcapture_guard_on_real_authorization": {"result": "passed_local_guard", "attempted_cents": 101, "approved_cents": 100, "reason": "cart_changed", "provider_calls_during_guard": 0, "scope": "Ledger guard against an altered cart on an actual authorized purchase. A preceding provider GET is excluded from the guard call count; no overcapture request was sent to PayPal. The HTTP override case remains a separate local test."},
+    "real_provider_reconciliation_after_injected_response_loss": {"result": "passed_controlled_fault", "fault_injected": true, "fault": "Successful real authorization reply deliberately suppressed before ledger completion", "state_after_fault": "reconcile_pending", "encumbered_cents_during_uncertainty": 100, "state_after_real_status_refresh": "authorized", "cleanup": "authorization subsequently voided", "scope": "Controlled local response suppression, not a naturally occurring timeout or process kill."}
+  },
+  "final_accounting": {
+    "capture_case": {"state": "captured", "spent_cents": 100, "encumbered_cents": 0, "available_cents": 900},
+    "void_case": {"state": "voided", "spent_cents": 0, "encumbered_cents": 0, "available_cents": 1000},
+    "scope": "Two isolated test household ledgers with 1000 cents initial discretionary capacity each. One settled sandbox capture; no remaining authorization holds in these scenarios. The earlier unapproved checkout was released locally."
+  },
+  "notable_responses": [
+    "After authorization, the Orders resource was COMPLETED while its authorization resource was CREATED and no capture existed. Order completion must not be interpreted as captured spend.",
+    "The initial capture returned HTTP 201; replaying the same request ID and body returned HTTP 200 with the same capture ID.",
+    "The void POST returned HTTP 200 with a VOIDED authorization representation, rather than an empty HTTP 204 response. A subsequent GET independently confirmed VOIDED.",
+    "The earlier checkout showed a currency error. Approval succeeded after using a new US Personal sandbox buyer in Chrome Incognito; those changes were not isolated, so the exact earlier root cause remains unconfirmed."
+  ],
+  "unverified": ["Production settlement and real money", "Honor-period and long-duration expiry behavior", "Provider overcapture allowances", "Natural network failures and real-provider process-kill recovery", "Live LLM callers, baseline comparison and prompt ablation", "Complete owner interface and financial-plan layer"],
+  "scope": "Actual PayPal sandbox requests with manual buyer approval and manual demo fulfilment. Separate local amount guard and deliberately injected response loss are labeled. No real money, real LLM evaluation or production-readiness claim."
+}

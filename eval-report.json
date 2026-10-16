@@ -1,0 +1,28 @@
+{
+  "kind": "local_deterministic_enforcement",
+  "test_cases": 112,
+  "run": 112,
+  "passed": 112,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "tcp_passed": 7,
+  "tcp_passed_cases": [
+    "test_gateway.HTTPTests.test_agent_http_denials_and_errors_drop_private_details",
+    "test_gateway.HTTPTests.test_agent_http_token_cannot_approve",
+    "test_gateway.HTTPTests.test_agent_http_views_hide_private_plan_and_audit",
+    "test_gateway.HTTPTests.test_missing_paypal_is_labeled",
+    "test_gateway.HTTPTests.test_owner_http_approval_and_agent_read_hide_permission",
+    "test_gateway.HTTPTests.test_two_scoped_http_clients_share_one_budget",
+    "test_gateway.HTTPTests.test_unauthenticated_client_is_denied"
+  ],
+  "original_five_tcp_passed": true,
+  "skipped_cases": [],
+  "seconds": 1.49,
+  "python": "3.14.7",
+  "live_paypal": "not_run_by_this_suite",
+  "separate_sandbox_evidence": "docs/sandbox-results.json",
+  "live_llm": "not_run",
+  "single_llm_memory_baseline": "not_run",
+  "scope": "Local ledger and gateway checks. Adapter tests use handwritten fixtures and offline replay of sanitized actual sandbox responses. No live provider calls in this suite."
+}

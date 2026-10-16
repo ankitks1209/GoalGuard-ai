@@ -1,0 +1,136 @@
+{
+  "observed_at_utc": "2026-10-16T20:42:15.980074+00:00",
+  "environment": "paypal_sandbox",
+  "method": "GET",
+  "path": "/v2/checkout/orders/resource-14",
+  "http_status": 200,
+  "request_id": null,
+  "request": null,
+  "response": {
+    "id": "resource-14",
+    "intent": "AUTHORIZE",
+    "status": "COMPLETED",
+    "payment_source": {
+      "paypal": {
+        "email_address": "[REDACTED]",
+        "account_id": "[REDACTED]",
+        "account_status": "VERIFIED",
+        "name": {
+          "given_name": "[REDACTED]",
+          "surname": "[REDACTED]"
+        },
+        "address": {
+          "country_code": "[REDACTED]"
+        }
+      }
+    },
+    "purchase_units": [
+      {
+        "reference_id": "resource-13",
+        "amount": {
+          "currency_code": "USD",
+          "value": "1.00",
+          "breakdown": {
+            "item_total": {
+              "currency_code": "USD",
+              "value": "1.00"
+            },
+            "shipping": {
+              "currency_code": "USD",
+              "value": "0.00"
+            },
+            "tax_total": {
+              "currency_code": "USD",
+              "value": "0.00"
+            }
+          }
+        },
+        "payee": {
+          "merchant_id": "resource-3"
+        },
+        "custom_id": "resource-13",
+        "items": [
+          {
+            "name": "sandbox-unit",
+            "unit_amount": {
+              "currency_code": "USD",
+              "value": "1.00"
+            },
+            "quantity": "1",
+            "sku": "sandbox-unit"
+          }
+        ],
+        "payments": {
+          "authorizations": [
+            {
+              "status": "CREATED",
+              "id": "resource-16",
+              "amount": {
+                "currency_code": "USD",
+                "value": "1.00"
+              },
+              "custom_id": "resource-13",
+              "seller_protection": {
+                "status": "ELIGIBLE",
+                "dispute_categories": [
+                  "ITEM_NOT_RECEIVED",
+                  "UNAUTHORIZED_TRANSACTION"
+                ]
+              },
+              "expiration_time": "2026-11-14T20:41:33Z",
+              "links": [
+                {
+                  "href": "https://api.sandbox.paypal.com/v2/payments/authorizations/resource-16",
+                  "rel": "self",
+                  "method": "GET"
+                },
+                {
+                  "href": "https://api.sandbox.paypal.com/v2/payments/authorizations/resource-16/capture",
+                  "rel": "capture",
+                  "method": "POST"
+                },
+                {
+                  "href": "https://api.sandbox.paypal.com/v2/payments/authorizations/resource-16/void",
+                  "rel": "void",
+                  "method": "POST"
+                },
+                {
+                  "href": "https://api.sandbox.paypal.com/v2/payments/authorizations/resource-16/reauthorize",
+                  "rel": "reauthorize",
+                  "method": "POST"
+                },
+                {
+                  "href": "https://api.sandbox.paypal.com/v2/checkout/orders/resource-14",
+                  "rel": "up",
+                  "method": "GET"
+                }
+              ],
+              "create_time": "2026-10-16T20:41:33Z",
+              "update_time": "2026-10-16T20:41:33Z"
+            }
+          ]
+        }
+      }
+    ],
+    "payer": {
+      "name": {
+        "given_name": "[REDACTED]",
+        "surname": "[REDACTED]"
+      },
+      "email_address": "[REDACTED]",
+      "payer_id": "[REDACTED]",
+      "address": {
+        "country_code": "[REDACTED]"
+      }
+    },
+    "create_time": "2026-10-16T20:41:33Z",
+    "update_time": "2026-10-16T20:41:33Z",
+    "links": [
+      {
+        "href": "https://api.sandbox.paypal.com/v2/checkout/orders/resource-14",
+        "rel": "self",
+        "method": "GET"
+      }
+    ]
+  }
+}

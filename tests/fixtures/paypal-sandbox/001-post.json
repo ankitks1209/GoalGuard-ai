@@ -1,0 +1,117 @@
+{
+  "observed_at_utc": "2026-10-16T20:19:24.741163+00:00",
+  "environment": "paypal_sandbox",
+  "method": "POST",
+  "path": "/v2/checkout/orders",
+  "http_status": 200,
+  "request_id": "resource-1",
+  "request": {
+    "intent": "AUTHORIZE",
+    "purchase_units": [
+      {
+        "reference_id": "resource-2",
+        "custom_id": "resource-2",
+        "payee": {
+          "merchant_id": "resource-3"
+        },
+        "items": [
+          {
+            "name": "sandbox-unit",
+            "sku": "sandbox-unit",
+            "quantity": "1",
+            "unit_amount": {
+              "currency_code": "USD",
+              "value": "1.00"
+            }
+          }
+        ],
+        "amount": {
+          "currency_code": "USD",
+          "value": "1.00",
+          "breakdown": {
+            "item_total": {
+              "currency_code": "USD",
+              "value": "1.00"
+            },
+            "shipping": {
+              "currency_code": "USD",
+              "value": "0.00"
+            },
+            "tax_total": {
+              "currency_code": "USD",
+              "value": "0.00"
+            }
+          }
+        }
+      }
+    ],
+    "payment_source": {
+      "paypal": {
+        "experience_context": {
+          "return_url": "http://localhost:8765/paypal-return",
+          "cancel_url": "http://localhost:8765/paypal-cancel",
+          "shipping_preference": "NO_SHIPPING",
+          "user_action": "PAY_NOW"
+        }
+      }
+    }
+  },
+  "response": {
+    "id": "resource-4",
+    "intent": "AUTHORIZE",
+    "status": "PAYER_ACTION_REQUIRED",
+    "payment_source": {
+      "paypal": {}
+    },
+    "purchase_units": [
+      {
+        "reference_id": "resource-2",
+        "amount": {
+          "currency_code": "USD",
+          "value": "1.00",
+          "breakdown": {
+            "item_total": {
+              "currency_code": "USD",
+              "value": "1.00"
+            },
+            "shipping": {
+              "currency_code": "USD",
+              "value": "0.00"
+            },
+            "tax_total": {
+              "currency_code": "USD",
+              "value": "0.00"
+            }
+          }
+        },
+        "payee": {
+          "merchant_id": "resource-3"
+        },
+        "custom_id": "resource-2",
+        "items": [
+          {
+            "name": "sandbox-unit",
+            "unit_amount": {
+              "currency_code": "USD",
+              "value": "1.00"
+            },
+            "quantity": "1",
+            "sku": "sandbox-unit"
+          }
+        ]
+      }
+    ],
+    "links": [
+      {
+        "href": "https://api.sandbox.paypal.com/v2/checkout/orders/resource-4",
+        "rel": "self",
+        "method": "GET"
+      },
+      {
+        "href": "https://www.sandbox.paypal.com/checkoutnow?token=[REDACTED]",
+        "rel": "payer-action",
+        "method": "GET"
+      }
+    ]
+  }
+}
