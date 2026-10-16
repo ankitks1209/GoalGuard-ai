@@ -1,4 +1,52 @@
-# Financial plan API — implemented slice
+# HTTP API
+
+The API uses JSON and listens on loopback by default. Every request requires
+`Authorization: Bearer <scoped token>`. Tokens identify the household and owner or
+agent role; callers cannot supply their own household scope. Use `Content-Type:
+application/json` on POST. State and financial errors generally return HTTP 409;
+missing authentication returns 401, forbidden scope 403, missing resources 404,
+unavailable provider 503 and unexpected internal failure 500. Responses are not cached.
+
+## Catalog, proposals and payment lifecycle
+
+| Route | Method | Scope | Body |
+|---|---|---|---|
+| `/v1/catalog` | GET | Agent/owner | None |
+| `/v1/budget` | GET | Owner full; agent coarse floor | None |
+| `/v1/proposals` | POST | Agent | `items`, `request_key` |
+| `/v1/purchases/{id}` | GET | Proposing agent/owner | None |
+| `/v1/purchases/{id}/audit` | GET | Owner | None |
+| `/v1/purchases/{id}/approve` | POST | Owner | `cart_hash` |
+| `/v1/purchases/{id}/release` | POST | Owner | `{}` |
+| `/v1/purchases/{id}/checkout` | POST | Owner | `{}` |
+| `/v1/purchases/{id}/authorize` | POST | Owner | `permit` |
+| `/v1/purchases/{id}/capture` | POST | Owner | `permit` |
+| `/v1/purchases/{id}/void` | POST | Owner | `permit` |
+| `/v1/purchases/{id}/refresh` | POST | Owner | `operation_id` |
+
+```json
+{"items":[{"sku":"mic-standard","quantity":1}],"request_key":"recording-001"}
+```
+
+Only SKU and integer quantity are accepted per item; the server determines
+merchant, price, currency and delivered total. A repeated key must keep the same
+cart. The default quota is three distinct proposals per agent per plan period,
+including denials. Default model tools omit the optional budget route.
+
+A reservation requires owner confirmation of a current funded financial plan.
+An insufficient-budget result returns `decision: denied`, `reason: budget_exceeded`
+and at most one feasible counteroffer with catalog items, total and
+`requires_new_proposal: true`. No financial records or exact balance are disclosed.
+A revised cart needs a new request key and fresh reservation. An uncertain
+transport result retains the old key for an idempotent retry.
+
+Owner approval returns a signed `permit` binding exact terms. It is an authority
+credential and must remain outside model context. Checkout creates the PayPal
+buyer-approval URL. The owner completes approval manually before authorization;
+capture represents manual demo fulfilment. Void cancels an uncaptured authorization.
+Unknown outcomes stay committed until status refresh. See [PayPal setup](paypal-setup.md).
+
+## Financial plan routes
 
 The loopback server requires an owner-confirmed plan before accepting purchases.
 All these routes use the existing owner bearer token. Agents receive `forbidden`
@@ -17,7 +65,7 @@ purchase authority. Confirmation recalculates under `BEGIN IMMEDIATE` and binds
 the preview to current policy, financial totals and affected purchases. Changed
 obligations produce `stale_plan_preview`; obtain and review a new preview.
 
-## Plan input
+### Plan input
 
 Generate a synthetic plan with current dates using:
 
@@ -57,7 +105,7 @@ YYYY-MM-DD, IDs/labels are nonempty and bounded, and duplicate bill IDs are reje
 The active period starts at confirmation and ends at the next month in the
 confirmed IANA timezone. Timezone and currency are immutable on revisions/rollover.
 
-## Financial semantics
+### Financial semantics
 
 ```text
 cash_base = opening_cash + recorded_cash_inflows - recorded_external_outflows
@@ -91,7 +139,7 @@ a savings transfer. A recorded deposit reduces cash, increases saved balance and
 fulfills the installment atomically; an extra deposit uses extra cash. Recording
 a deposit never recomputes the fixed installment or its original schedule.
 
-## Cash events
+### Cash events
 
 Record only activity the owner confirms has actually happened externally. These
 routes do not move money or pay bills.
@@ -114,7 +162,7 @@ returns the current summary without a second adjustment; changed payload rejects
 Actual events are recorded even during provider uncertainty. They invalidate
 pre-payment approvals atomically but preserve any payment already started.
 
-## Revisions and rollover
+### Revisions and rollover
 
 Title-only edits and expected income amount-only edits preserve approvals. Other
 financial changes advance policy version and release all pre-payment reservations
@@ -138,7 +186,7 @@ their opening-cash basis needs a separate explicit migration. It never resets th
 money or rotates the signing key. Use a fresh external state directory for the new
 owner workflow rather than erasing existing payment state.
 
-## Evidence and limits
+### Evidence and limits
 
 Financial behavior is checked with controlled clocks, shared-file concurrent
 writers and local HTTP. This is separate from the earlier real sandbox lifecycle.

@@ -1,6 +1,0 @@
-interface:
-  display_name: "GoalGuard Engineering"
-  short_description: "Build and verify GoalGuard payment workflows"
-  default_prompt: "Use $goalguard-engineering to implement the next authorized GoalGuard milestone and report measured evidence."
-policy:
-  allow_implicit_invocation: false

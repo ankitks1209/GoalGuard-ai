@@ -8,6 +8,7 @@ import tempfile
 from goalguard import Ledger, Rejection
 from goalguard.catalog import Catalog
 from goalguard.gateway import Gateway, Principal
+from evaluate import execution_provenance
 
 
 def probe(headroom, limit):
@@ -60,7 +61,7 @@ def evaluate():
                 "Accepted reservations stay counted; attacker does not cancel or reset the ledger.",
                 "Decision outcomes and counteroffers still leak feasibility; proposal caps do not guarantee privacy.",
                 "Multiple authorized agents can combine observations; quotas can also block legitimate fourth proposals.",
-                "Gateway period is a trusted fixed prototype ID until the financial-plan layer supplies real periods."],
+                "This legacy aggregate test uses a fixed prototype period; confirmed financial plans use their actual plan ID."],
             "results": runs}
 
 
@@ -69,7 +70,9 @@ def main():
     parser.add_argument("--report", type=Path)
     args = parser.parse_args()
     report = evaluate()
+    report["provenance"] = execution_provenance("probe_evaluate.py", args)
     if args.report:
+        args.report.parent.mkdir(parents=True, exist_ok=True)
         args.report.write_text(json.dumps(report, indent=2) + "\n")
     print(json.dumps({k: v for k, v in report.items() if k != "results"}, indent=2))
 

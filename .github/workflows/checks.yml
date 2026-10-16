@@ -1,0 +1,61 @@
+name: Checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: checks-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Python ${{ matrix.python }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.11', '3.14']
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install development tools
+        run: python -m pip install -e '.[dev]'
+      - name: Run local enforcement checks with TCP required
+        run: python evaluate.py --report "$RUNNER_TEMP/goalguard-eval.json" --require-tcp
+      - name: Run synthetic probing experiment
+        run: python probe_evaluate.py --report "$RUNNER_TEMP/goalguard-probing.json"
+      - name: Run local demo
+        run: python demo.py
+      - name: Build source and wheel distributions
+        run: python -m build
+      - name: Check installed wheel outside the checkout
+        shell: bash
+        run: |
+          python -m venv "$RUNNER_TEMP/goalguard-wheel"
+          "$RUNNER_TEMP/goalguard-wheel/bin/python" -m pip install dist/*.whl
+          cd "$RUNNER_TEMP"
+          "$RUNNER_TEMP/goalguard-wheel/bin/goalguard-server" --help
+          "$RUNNER_TEMP/goalguard-wheel/bin/goalguard-demo"
+      - name: Save evaluation artifacts
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: verification-python-${{ matrix.python }}
+          path: |
+            ${{ runner.temp }}/goalguard-eval.json
+            ${{ runner.temp }}/goalguard-probing.json
+          retention-days: 14
+          if-no-files-found: warn

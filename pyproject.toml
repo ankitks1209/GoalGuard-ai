@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "goalguard-ai"
+version = "0.1.0"
+description = "Goal-aware budget and payment controls for AI shopping agents"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE"]
+dependencies = []
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.14",
+]
+
+[project.optional-dependencies]
+dev = ["build>=1.2,<2"]
+
+[project.urls]
+Repository = "https://github.com/ankitks1209/GoalGuard-ai"
+Documentation = "https://github.com/ankitks1209/GoalGuard-ai/tree/main/docs"
+Issues = "https://github.com/ankitks1209/GoalGuard-ai/issues"
+
+[project.scripts]
+goalguard-server = "server:main"
+goalguard-demo = "demo:main"
+
+[tool.setuptools]
+packages = ["goalguard"]
+py-modules = ["server", "demo", "evaluate", "probe_evaluate"]

@@ -1,0 +1,9 @@
+include .env.example CONTRIBUTING.md SECURITY.md agent-tools.json
+include docs/getting-started.md docs/architecture.md docs/financial-semantics.md
+include docs/api.md docs/evaluation.md docs/paypal-setup.md docs/roadmap.md
+include reports/README.md
+recursive-include reports *.json
+recursive-include prompts *.txt *.json
+recursive-include tests *.py *.json
+global-exclude *.pyc *.pyo *.sqlite *.sqlite-shm *.sqlite-wal *.signing-key
+exclude .env .env.models tokens.json

@@ -1,6 +1,6 @@
 """Offline replay of sanitized responses observed in PayPal sandbox on 2026-10-17.
 
-These regressions make no provider requests; provenance is in docs/sandbox-results.json.
+These regressions make no provider requests; provenance is in reports/paypal-sandbox.json.
 """
 
 from copy import deepcopy

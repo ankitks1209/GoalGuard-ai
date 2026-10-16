@@ -10,3 +10,7 @@ state/
 tokens.json
 *.signing-key
 .DS_Store
+.venv/
+build/
+dist/
+*.egg-info/

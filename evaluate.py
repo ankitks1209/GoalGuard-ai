@@ -1,11 +1,36 @@
 """Run deterministic enforcement checks; never label these live LLM/PayPal evals."""
 
 import argparse
+from datetime import datetime, timezone
 import json
 from pathlib import Path
 import platform
+import subprocess
 import time
 import unittest
+
+
+def execution_provenance(script, args):
+    root = Path(__file__).resolve().parent
+    revision, dirty = None, None
+    try:
+        revision = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root,
+                                           stderr=subprocess.DEVNULL, text=True).strip()
+        status = subprocess.check_output(
+            ["git", "status", "--porcelain", "--untracked-files=normal", "--", ".", ":(exclude)reports/**"],
+            cwd=root, stderr=subprocess.DEVNULL, text=True)
+        dirty = bool(status.strip())
+    except (OSError, subprocess.CalledProcessError):
+        pass
+    command = ["python", script]
+    if args.report:
+        command += ["--report", str(args.report) if not args.report.is_absolute() else "<external-report>"]
+    if getattr(args, "require_tcp", False):
+        command.append("--require-tcp")
+    return {"recorded_at_utc": datetime.now(timezone.utc).isoformat(),
+            "source_revision": revision, "source_tree_dirty": dirty,
+            "dirty_check_excludes": ["reports/"], "command": command,
+            "python": platform.python_version()}
 
 
 class EvidenceResult(unittest.TextTestResult):
@@ -47,10 +72,11 @@ def main():
         "seconds": round(time.perf_counter() - start, 3),
         "python": platform.python_version(),
         "live_paypal": "not_run_by_this_suite",
-        "separate_sandbox_evidence": "docs/sandbox-results.json",
+        "separate_sandbox_evidence": "reports/paypal-sandbox.json",
         "live_llm": "not_run",
         "single_llm_memory_baseline": "not_run",
         "scope": "Local ledger and gateway checks. Adapter tests use handwritten fixtures and offline replay of sanitized actual sandbox responses. No live provider calls in this suite.",
+        "provenance": execution_provenance("evaluate.py", args),
     }
     if args.report:
         args.report.parent.mkdir(parents=True, exist_ok=True)
