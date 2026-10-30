@@ -1,0 +1,49 @@
+{
+  "kind": "postman_disposable_synthetic_api_walkthrough",
+  "observed_date": "2026-10-27",
+  "source": {
+    "base_revision": "93518ad",
+    "working_tree_dirty": true,
+    "note": "Uncommitted working-tree tooling and application; not a committed-source or hosted-CI snapshot."
+  },
+  "tool": {
+    "name": "Postman CLI",
+    "version": "1.80.0",
+    "platform": "macOS ARM64",
+    "archive_sha256": "09aec4441262b31974615f2f331040dac5b0cd750626f891056f40475571d052",
+    "apple_signature_verification": "passed outside sandbox with Postman team requirement H7H8Q7M5CK",
+    "archive_integrity": "passed",
+    "event_reporting": "disabled",
+    "cloud_login": "not used",
+    "publication": "not requested"
+  },
+  "collection": "postman/goalguard.postman_collection.json",
+  "fixture": "scripts/postman_fixture.py",
+  "result": {
+    "exit_code": 0,
+    "iterations": 1,
+    "requests": 18,
+    "assertions": 45,
+    "failed_requests": 0,
+    "failed_assertions": 0,
+    "duration_ms": 336
+  },
+  "observed": [
+    "Missing authentication and agent access to owner plans rejected",
+    "Plan preview saved without activation; exact synthetic plan separately confirmed",
+    "Server-priced microphone reserved for 22000 USD cents",
+    "Same-key identical retry returned the same purchase; changed cart rejected",
+    "Second agent's 18000-cent cart denied; returned 10000-cent alternative reserved",
+    "Agent approval rejected; changed cart consent rejected; fixture owner approved exact cart",
+    "32000 cents encumbered once; 3000 cents available; zero captured spend",
+    "Agent status omitted consent authority; owner audit contained approval"
+  ],
+  "limits": [
+    "Deterministic sequential synthetic API callers, not real AI agents or a concurrency evaluation",
+    "No model, PayPal or retailer provider configured or called by the application",
+    "Automatic fixture confirmation/approval is not real owner consent",
+    "No browser session/CSRF workflow or actual Postman app import verified here",
+    "No combined AI-to-payment demonstration or sponsor-prize eligibility established",
+    "APIMatic context endpoint returned HTTP 401; no successful context lookup claimed"
+  ]
+}

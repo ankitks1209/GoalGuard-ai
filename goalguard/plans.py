@@ -119,6 +119,7 @@ class FinancialPlans:
         start, end = now, period_end(now, spec["timezone"])
         changed = True
         if active:
+            assert summary is not None  # Constructed from the same active plan above.
             if spec["currency"] != old_spec["currency"] or spec["timezone"] != old_spec["timezone"]:
                 raise Rejection("immutable_period", "Currency and timezone cannot change on an active household plan.")
             if mode == "revise":

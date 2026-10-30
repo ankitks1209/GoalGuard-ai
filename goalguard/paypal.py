@@ -43,7 +43,7 @@ class PayPal:
         self.return_url = return_url
         self.cancel_url = cancel_url
         self._token = None
-        self._token_until = 0
+        self._token_until: float = 0
         self._token_lock = threading.Lock()
 
     @staticmethod

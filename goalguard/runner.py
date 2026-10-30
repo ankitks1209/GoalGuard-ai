@@ -9,7 +9,7 @@ from .ledger import Rejection
 class ProposalRunner:
     """One initial proposal plus one revision. A fresh run cannot reset gateway quotas."""
 
-    def __init__(self, gateway, principal):
+    def __init__(self, gateway, principal, *, skills=None):
         if principal.role != "agent":
             raise ValueError("Shopping runs require an agent principal.")
         self.gateway = gateway
@@ -20,6 +20,11 @@ class ProposalRunner:
         self._key = None
         self._outcome = None
         self._stop_reason = None
+        self._skills = dict(skills or {})
+
+    @property
+    def stop_reason(self):
+        return self._stop_reason or ("tool_limit" if self.tool_calls >= 8 else None)
 
     def call(self, tool, arguments):
         if self.tool_calls >= 8:
@@ -30,6 +35,11 @@ class ProposalRunner:
         if not isinstance(arguments, dict):
             return agent_view({"reason": "invalid_body"})
         try:
+            if tool == "get_skill" and set(arguments) == {"resource"}:
+                resource = arguments["resource"]
+                if isinstance(resource, str) and resource in self._skills:
+                    return {"resource": resource, "text": self._skills[resource]}
+                return agent_view({"reason": "invalid_request"})
             if tool == "get_catalog" and not arguments:
                 return agent_view({"products": self.gateway.catalog.public()})
             if tool == "get_purchase" and set(arguments) == {"purchase_id"}:

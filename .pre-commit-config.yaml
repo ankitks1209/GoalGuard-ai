@@ -1,0 +1,23 @@
+minimum_pre_commit_version: '4.0.0'
+default_install_hook_types: [pre-commit]
+repos:
+  - repo: local
+    hooks:
+      - id: goalguard-lint
+        name: GoalGuard lint
+        entry: python -m ruff check .
+        language: system
+        pass_filenames: false
+        always_run: true
+      - id: goalguard-tests
+        name: GoalGuard complete deterministic suite
+        entry: python scripts/pre_commit_tests.py
+        language: system
+        pass_filenames: false
+        always_run: true
+      - id: goalguard-frontend
+        name: GoalGuard frontend lint, types, coverage and build
+        entry: npm --prefix frontend run check
+        language: system
+        pass_filenames: false
+        always_run: true

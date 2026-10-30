@@ -6,9 +6,11 @@ GoalGuard is an alpha prototype for local development and PayPal sandbox use.
 It is not ready for real-money use or public hosting. No release currently has
 production security support.
 
-The API binds to loopback and uses scoped local bearer tokens. Owner credentials
-and signed consent permits belong only in the trusted owner workflow. Real user
-authentication, browser sessions and request protection are unfinished.
+The API binds to loopback and uses scoped local bearer tokens. The owner browser
+exchanges its development token for a fixed 30-minute in-memory session with an
+HttpOnly, SameSite=Strict cookie, session-bound CSRF and expected Origin/Host checks.
+Owner credentials and signed consent permits belong only in the trusted owner
+workflow. Production authentication and public-hosting security remain unfinished.
 
 ## Reporting a vulnerability
 

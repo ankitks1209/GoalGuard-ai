@@ -19,7 +19,13 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
-dev = ["build>=1.2,<2"]
+dev = [
+  "build>=1.2,<2",
+  "ruff>=0.12,<1",
+  "mypy>=1.16,<3",
+  "coverage[toml]>=7.9,<8",
+  "pre-commit>=4,<5",
+]
 
 [project.urls]
 Repository = "https://github.com/ankitks1209/GoalGuard-ai"
@@ -31,5 +37,40 @@ goalguard-server = "server:main"
 goalguard-demo = "demo:main"
 
 [tool.setuptools]
-packages = ["goalguard"]
+packages = ["goalguard", "goalguard.resources"]
 py-modules = ["server", "demo", "evaluate", "probe_evaluate"]
+
+[tool.setuptools.package-data]
+goalguard = ["resources/*.txt", "resources/*.json"]
+
+[tool.ruff]
+target-version = "py311"
+extend-exclude = [".local", "build", "dist"]
+
+[tool.ruff.lint]
+# Correctness checks first; adopting formatting would create unrelated churn.
+select = ["E4", "E7", "E9", "F"]
+
+[tool.mypy]
+python_version = "3.11"
+files = ["goalguard", "server.py", "demo.py", "agent.py", "draft_plan.py", "evaluate.py", "probe_evaluate.py", "scripts"]
+check_untyped_defs = true
+disallow_untyped_defs = false
+warn_unused_ignores = true
+warn_redundant_casts = true
+show_error_codes = true
+explicit_package_bases = true
+
+[tool.coverage.run]
+branch = true
+source = ["."]
+data_file = ".local/checks/.coverage"
+
+[tool.coverage.report]
+include = ["goalguard/*.py", "server.py", "demo.py", "agent.py", "draft_plan.py"]
+fail_under = 80
+show_missing = true
+precision = 2
+
+[tool.coverage.xml]
+output = ".local/checks/coverage.xml"

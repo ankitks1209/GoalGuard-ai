@@ -1,0 +1,58 @@
+{
+  "kind": "actual_model_initial_plan_draft_observation",
+  "observed_local_date": "2026-10-21",
+  "execution": "owner_terminal",
+  "observed_command": "python draft_plan.py --demo",
+  "input_scope": "built-in synthetic financial text",
+  "started_at_utc": "2026-10-20T19:24:50.142535+00:00",
+  "finished_at_utc": "2026-10-20T19:25:06.825943+00:00",
+  "workflow_elapsed_seconds": 16.683,
+  "provider": "gemini",
+  "model": "gemini-3.5-flash-lite",
+  "model_version": "gemini-3.5-flash-lite",
+  "usage": {
+    "promptTokenCount": 469,
+    "candidatesTokenCount": 222,
+    "totalTokenCount": 691
+  },
+  "prompt_sha256": "d02177944a630f9bad07035dc2f7ffca310a5381af65c2a66546a77a9e982ce4",
+  "schema_sha256": "b18c79836bb70d5f5860506032b9672f81a021951bf474786be15499cc13b105",
+  "outcome": {
+    "http_status": 200,
+    "status": "draft_ready",
+    "draft_saved": true,
+    "active_plan_created": false,
+    "requires_owner_confirmation": true,
+    "confirmation": "not_requested",
+    "payments": "none",
+    "suggested_contribution_cents": 10000,
+    "available_cents": 35000,
+    "computed_fields": [
+      "goal.contribution_cents"
+    ],
+    "questions": [],
+    "issues": []
+  },
+  "synthetic_case": {
+    "opening_cash_cents": 60000,
+    "bill_total_cents": 10000,
+    "buffer_cents": 5000,
+    "goal_target_cents": 60000,
+    "separately_saved_cents": 30000,
+    "currency": "USD"
+  },
+  "source_provenance": {
+    "source_revision": "93518ad26bfcd2fbe96b387b7a21b3491cc73ea3",
+    "source_tree_dirty": true,
+    "python": "3.14.7",
+    "command": "python agent.py (private arguments omitted)"
+  },
+  "metadata_note": "The shared producer helper labels its command as agent.py. observed_command above comes from the operator output; original provenance is retained rather than silently corrected.",
+  "limitations": [
+    "One observed synthetic-input extraction, not a repeated reliability evaluation.",
+    "No owner confirmation, active plan, shopping, or PayPal payment in this run.",
+    "Workflow duration includes setup and local HTTP; it is not isolated model latency.",
+    "Token usage does not establish account tier or billing cost.",
+    "Actual private owner financial data processing remains a separate unresolved policy decision."
+  ]
+}

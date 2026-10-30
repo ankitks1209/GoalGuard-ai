@@ -8,6 +8,7 @@ import platform
 import subprocess
 import time
 import unittest
+from typing import cast
 
 
 def execution_provenance(script, args):
@@ -51,7 +52,8 @@ def main():
     suite = unittest.defaultTestLoader.discover("tests")
     count = suite.countTestCases()
     start = time.perf_counter()
-    result = unittest.TextTestRunner(verbosity=2, resultclass=EvidenceResult).run(suite)
+    runner = unittest.TextTestRunner(verbosity=2, resultclass=EvidenceResult)
+    result = cast(EvidenceResult, runner.run(suite))
     original_tcp = ["test_unauthenticated_client_is_denied", "test_two_scoped_http_clients_share_one_budget",
                     "test_agent_http_token_cannot_approve", "test_owner_http_approval_and_agent_read_hide_permission",
                     "test_missing_paypal_is_labeled"]

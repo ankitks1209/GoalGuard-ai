@@ -1,0 +1,126 @@
+/* GoalGuard design tokens. Selected system approved to proceed on 23 October 2026.
+   Selected: merged Teenage Engineering + Enpower, light, Instrument Sans,
+   split workspace, softer controls, direct voice, standard accessible sizing.
+   Semantic aliases preserve the reviewed monochrome state board; no new hues. */
+@font-face {
+  font-family: "Instrument Sans";
+  src: url("../../frontend/src/assets/InstrumentSans.ttf") format("truetype");
+  font-weight: 400 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: light;
+  --color-background: #f5f5f1;
+  --color-surface: #ffffff;
+  --color-ink: #20231f;
+  --color-muted: #555b51;
+  --color-border: #73776d;
+  --color-action: var(--color-ink);
+  --color-on-action: var(--color-surface);
+  --color-focus: var(--color-ink);
+  --color-success: var(--color-ink);
+  --color-warning: var(--color-ink);
+  --color-error: var(--color-ink);
+  --color-dialog-shadow: rgb(32 35 31 / 16%);
+
+  --font-body: "Instrument Sans", system-ui, sans-serif;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-size-detail: 0.875rem;
+  --font-size-body: 1rem;
+  --font-size-navigation: 1.625rem;
+  --font-size-section: 1.625rem;
+  --font-size-headline: clamp(2.5rem, 5.4vw, 4.375rem);
+  --font-size-amount: clamp(4rem, 12vw, 9.75rem);
+  --line-height-body: 1.5;
+  --line-height-heading: 0.98;
+  --line-height-amount: 1.05;
+  --tracking-headline: -0.055em;
+  --tracking-amount: -0.065em;
+  --measure-body: 66ch;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --radius-surface: 0;
+  --radius-field: 0.25rem;
+  --radius-button: 0.375rem;
+  --radius-dialog: 0.5rem;
+  --border-width: 1px;
+  --icon-stroke-width: 1px;
+  --icon-linecap: round;
+  --icon-linejoin: round;
+  --shadow-dialog: 0 0.5rem 1.5rem var(--color-dialog-shadow);
+  --shadow-content: none;
+
+  --control-min-size: 2.75rem;
+  --focus-width: 2px;
+  --focus-offset: 3px;
+  --motion-duration: 0s;
+  --layout-max-width: 90rem;
+  --layout-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  --layout-gap: var(--space-12);
+  --page-gutter: var(--space-12);
+  --page-min-height: 100svh;
+  --navigation-columns: 1fr repeat(3, 1.4fr);
+  --navigation-brand-column: auto;
+  --navigation-item-display: flex;
+  --navigation-description-display: block;
+  --navigation-gap: var(--space-6);
+  --icon-width: 3rem;
+  --icon-height: 3.5rem;
+  --brand-size: 1.625rem;
+  --form-columns: repeat(2, minmax(0, 1fr));
+  --bill-columns: minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1fr) auto;
+  --heading-margin: var(--space-8);
+  --grain-opacity: 0.025;
+  --layer-grain: -1;
+  --layer-focus: 10;
+  --underline-offset: 0.25em;
+  --tracking-navigation: -0.03em;
+  --font-size-brand: 1.625rem;
+  --line-height-navigation: 1.1;
+  --checkbox-size: 1.25rem;
+  --table-cell-space: var(--space-2);
+  --timeline-indent: var(--space-6);
+  --timeline-columns: minmax(0, 1fr) minmax(0, 3fr);
+  --font-body-min: 1rem;
+}
+
+/* Responsive numeric thresholds live with design values, not in components. */
+@media (max-width: 800px) {
+  :root {
+    --layout-columns: minmax(0, 1fr);
+    --timeline-columns: minmax(0, 1fr);
+    --layout-gap: var(--space-4);
+    --page-gutter: var(--space-6);
+    --font-size-navigation: 1.25rem;
+    --font-size-amount: clamp(4rem, 17vw, 8.125rem);
+    --navigation-columns: repeat(3, minmax(0, 1fr));
+    --navigation-brand-column: 1 / -1;
+    --navigation-item-display: block;
+    --icon-width: 2.5rem;
+    --icon-height: 2.75rem;
+    --bill-columns: repeat(2, minmax(0, 1fr));
+    --heading-margin: var(--space-6);
+  }
+}
+@media (max-width: 420px) {
+  :root {
+    --page-gutter: var(--space-4);
+    --font-size-navigation: clamp(1rem, 5vw, 1.25rem);
+    --font-size-headline: 2.75rem;
+    --font-size-amount: clamp(4rem, 19vw, 5.25rem);
+    --navigation-description-display: none;
+    --navigation-gap: var(--space-2);
+    --form-columns: minmax(0, 1fr);
+    --bill-columns: minmax(0, 1fr);
+  }
+}

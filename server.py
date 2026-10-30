@@ -3,14 +3,16 @@
 import argparse
 import hashlib
 import hmac
+from http.cookies import CookieError, SimpleCookie
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
+import mimetypes
 import os
 from pathlib import Path
 import secrets
 import tempfile
 import threading
-from urllib.parse import urlparse
+from urllib.parse import unquote, urlparse
 
 from goalguard import Ledger, Rejection
 from goalguard.catalog import Catalog
@@ -18,6 +20,9 @@ from goalguard.config import sandbox_config, SANDBOX_KEYS
 from goalguard.gateway import Gateway, Principal
 from goalguard.paypal import PayPal, PaymentUnavailable
 from goalguard.agent_view import agent_view
+from goalguard.drafting import PlanDrafter
+from goalguard.models import Gemini, ModelUnavailable, model_config
+from goalguard.sessions import COOKIE_NAME, OwnerSession, OwnerSessions, session_cookie
 
 
 def token_config(path: Path):
@@ -36,20 +41,30 @@ def token_config(path: Path):
     return body
 
 
-def make_handler(gateway: Gateway, tokens: dict):
+def make_handler(gateway: Gateway, tokens: dict, *, static_root: Path | None = None):
     known = [(hashlib.sha256(token.encode()).digest(),
               Principal("demo-home", role, "owner" if role == "owner" else "agent"))
              for role, token in tokens.items()]
+    sessions = OwnerSessions()
+    assets = (static_root or Path(__file__).resolve().parent / "frontend" / "dist").resolve()
 
     class Handler(BaseHTTPRequestHandler):
         server_version = "GoalGuardPrototype/0.1"
+        owner_session: OwnerSession | None = None
+        response_cookie: str | None = None
 
         def log_message(self, fmt, *args):
             # Avoid recording raw URLs, bearer tokens, bodies or query parameters.
             pass
 
-        def _actor(self):
-            header = self.headers.get("Authorization", "")
+        def _header(self, name):
+            values = self.headers.get_all(name, [])
+            if len(values) > 1:
+                raise Rejection("forbidden", "Ambiguous request headers.")
+            return values[0] if values else ""
+
+        def _bearer_actor(self):
+            header = self._header("Authorization")
             if not header.startswith("Bearer "):
                 raise Rejection("unauthorized", "A scoped bearer token is required.")
             fingerprint = hashlib.sha256(header[7:].encode()).digest()
@@ -57,6 +72,49 @@ def make_handler(gateway: Gateway, tokens: dict):
                 if hmac.compare_digest(fingerprint, expected):
                     return principal
             raise Rejection("unauthorized", "Unknown token.")
+
+        def _session_id(self):
+            cookie = SimpleCookie()
+            try:
+                cookie.load(self._header("Cookie"))
+            except CookieError:
+                return ""
+            morsel = cookie.get(COOKIE_NAME)
+            return morsel.value if morsel is not None else ""
+
+        def _browser_request(self, *, mutation):
+            # Derive authority from the bound listener, never from forwarded headers.
+            address = self.server.server_address
+            if not isinstance(address, tuple) or address[0] != "127.0.0.1":
+                raise Rejection("forbidden", "Browser sessions require the local IPv4 listener.")
+            port = address[1]
+            suffix = "" if port == 80 else f":{port}"
+            host = self._header("Host")
+            if host not in {"127.0.0.1" + suffix, "localhost" + suffix}:
+                raise Rejection("forbidden", "Unexpected browser Host.")
+            origin = self._header("Origin")
+            if (mutation or origin) and origin != "http://" + host:
+                raise Rejection("forbidden", "A same-origin browser request is required.")
+            fetch_site = self._header("Sec-Fetch-Site")
+            if fetch_site and fetch_site != "same-origin":
+                raise Rejection("forbidden", "A same-origin browser request is required.")
+            if mutation and self._header("Content-Type").split(";", 1)[0].strip().lower() != "application/json":
+                raise Rejection("forbidden", "Browser mutations require application/json.")
+
+        def _actor(self, method):
+            if self._header("Authorization"):
+                # CLI/agent bearer clients remain supported. Browser mutations use
+                # the cookie path so bearer credentials cannot bypass CSRF checks.
+                if method == "POST" and any(name in self.headers for name in
+                                            ("Origin", "Sec-Fetch-Site", "Cookie")):
+                    raise Rejection("forbidden", "Unlock a browser session before making changes.")
+                return self._bearer_actor()
+            session = sessions.get(self._session_id())
+            self._browser_request(mutation=method == "POST")
+            if method == "POST":
+                sessions.check_csrf(session, self._header("X-CSRF-Token"))
+            self.owner_session = session
+            return session.principal
 
         def _body(self):
             raw_length = self.headers.get("Content-Length", "0")
@@ -75,23 +133,75 @@ def make_handler(gateway: Gateway, tokens: dict):
             return value
 
         def _reply(self, code, payload):
-            if getattr(self, "principal", None) is None or self.principal.role != "owner":
+            principal = getattr(self, "principal", None)
+            if principal is None or principal.role != "owner":
                 payload = agent_view(payload)
             body = json.dumps(payload).encode()
             self.send_response(code)
             self.send_header("Content-Type", "application/json")
             self.send_header("Content-Length", str(len(body)))
             self.send_header("Cache-Control", "no-store")
+            if self.response_cookie is not None:
+                self.send_header("Set-Cookie", self.response_cookie)
+            self.end_headers()
+            self.wfile.write(body)
+
+        def _static(self, path):
+            relative = "index.html" if path == "/" else unquote(path).lstrip("/")
+            if relative != "index.html" and not relative.startswith("assets/"):
+                raise Rejection("not_found", "Unknown interface asset.")
+            target = (assets / relative).resolve()
+            if not target.is_relative_to(assets) or not target.is_file():
+                raise Rejection("not_found", "Build the owner interface before opening it.")
+            body = target.read_bytes()
+            self.send_response(200)
+            self.send_header("Content-Type", mimetypes.guess_type(target.name)[0] or "application/octet-stream")
+            self.send_header("Content-Length", str(len(body)))
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("X-Content-Type-Options", "nosniff")
+            self.send_header("Referrer-Policy", "no-referrer")
+            self.send_header("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; frame-ancestors 'none'; base-uri 'none'; form-action 'self'")
             self.end_headers()
             self.wfile.write(body)
 
         def _dispatch(self, method):
             self.principal = None
+            self.owner_session = None
+            self.response_cookie = None
             try:
-                principal = self._actor()
-                self.principal = principal
                 path = urlparse(self.path).path.rstrip("/")
-                if method == "GET" and path == "/v1/catalog":
+                if method == "GET" and not path.startswith("/v1/"):
+                    self._static(path or "/")
+                    return
+                if method == "POST" and path == "/v1/owner/session":
+                    self.principal = self._bearer_actor()
+                    if self.principal.role != "owner":
+                        raise Rejection("forbidden", "Only an owner can unlock the interface.")
+                    self._browser_request(mutation=True)
+                    if self._body():
+                        raise Rejection("invalid_body", "Session exchange requires an empty JSON object.")
+                    sessions.revoke(self._session_id())
+                    session = sessions.create(self.principal)
+                    self.response_cookie = session_cookie(session.identifier)
+                    self._reply(200, sessions.describe(session))
+                    return
+                principal = self._actor(method)
+                self.principal = principal
+                if path == "/v1/owner/overview" and method == "GET":
+                    result = gateway.owner_overview(principal)
+                elif path == "/v1/owner/session" and method == "GET":
+                    if self.owner_session is None:
+                        raise Rejection("unauthorized", "An owner browser session is required.")
+                    result = sessions.describe(self.owner_session)
+                elif path == "/v1/owner/logout" and method == "POST":
+                    if self.owner_session is None:
+                        raise Rejection("unauthorized", "An owner browser session is required.")
+                    if self._body():
+                        raise Rejection("invalid_body", "Logout requires an empty JSON object.")
+                    sessions.revoke(self.owner_session.identifier)
+                    self.response_cookie = session_cookie("", clear=True)
+                    result = {"status": "locked"}
+                elif method == "GET" and path == "/v1/catalog":
                     result = {"products": gateway.catalog.public(), "simulation": "synthetic_catalog"}
                 elif method == "GET" and path == "/v1/budget":
                     result = gateway.budget(principal)
@@ -101,7 +211,7 @@ def make_handler(gateway: Gateway, tokens: dict):
                     result = gateway.plan(principal)
                 elif path == "/v1/plan/audit" and method == "GET":
                     result = gateway.plan(principal, "audit")
-                elif path in ("/v1/plan/preview", "/v1/plan/confirm", "/v1/plan/cash-events") and method == "POST":
+                elif path in ("/v1/plan/draft", "/v1/plan/preview", "/v1/plan/confirm", "/v1/plan/cash-events") and method == "POST":
                     result = gateway.plan(principal, path.rsplit("/", 1)[-1], self._body())
                 elif path.startswith("/v1/purchases/"):
                     parts = path.split("/")
@@ -141,6 +251,9 @@ def make_handler(gateway: Gateway, tokens: dict):
                 self._reply(code, error.as_dict())
             except PaymentUnavailable as error:
                 self._reply(503, {"reason": "payment_unavailable", "message": str(error)})
+            except ModelUnavailable as error:
+                self._reply(503, {"reason": error.code, "manual_entry_available": True,
+                                  "message": "Model drafting did not complete. Manual plan entry remains available."})
             except Exception:
                 self._reply(500, {"reason": "internal_error", "message": "Operation failed; inspect purchase status before retrying."})
 
@@ -160,6 +273,7 @@ def main():
         "goalguard-runtime-" + hashlib.sha256(str(project).encode()).hexdigest()[:12])
     parser.add_argument("--state-dir", type=Path, default=default_state)
     parser.add_argument("--env-file", type=Path, default=project / ".env")
+    parser.add_argument("--model-env-file", type=Path, default=project / ".env.models")
     parser.add_argument("--port", type=int, default=8765)
     args = parser.parse_args()
     if args.state_dir.resolve().is_relative_to(project):
@@ -177,7 +291,14 @@ def main():
     config = sandbox_config(args.env_file)
     if all(config[key] for key in SANDBOX_KEYS):
         paypal = PayPal(*(config[key] for key in SANDBOX_KEYS))
-    gateway = Gateway(ledger, Catalog(), paypal, require_plan=True)
+    drafter = None
+    try:
+        models = model_config(args.model_env_file)
+        if models["GEMINI_API_KEY"] and models["GEMINI_MODEL_B"]:
+            drafter = PlanDrafter(Gemini(models["GEMINI_API_KEY"], models["GEMINI_MODEL_B"]))
+    except (ValueError, OSError):
+        print("Plan drafting configuration unavailable; manual plan entry remains available.")
+    gateway = Gateway(ledger, Catalog(), paypal, require_plan=True, drafter=drafter)
     server = ThreadingHTTPServer(("127.0.0.1", args.port), make_handler(gateway, tokens))
     stop = threading.Event()
     def sweep():
@@ -190,6 +311,7 @@ def main():
     print("Catalog: synthetic. Fulfilment: manual demo action. PayPal: " +
           ("sandbox adapter configured; consult saved verification evidence" if paypal else "not configured"))
     print("Purchasing requires an owner-confirmed current financial plan; no plan is activated automatically.")
+    print("Owner text drafting: " + ("configured; explicit model-processing consent required" if drafter else "unavailable; use manual entry"))
     try:
         server.serve_forever()
     except KeyboardInterrupt:

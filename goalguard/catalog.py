@@ -1,11 +1,21 @@
 """Explicitly synthetic, fixed-price demo products; no real retailer claims."""
 
 from itertools import product
+from typing import TypedDict
 
 from .ledger import Cart, Item, Rejection
 
 
-PRODUCTS = {
+class Product(TypedDict):
+    name: str
+    unit_cents: int
+    need: str
+    features: set[str]
+    utility: int
+    description: str
+
+
+PRODUCTS: dict[str, Product] = {
     "mic-standard": {"name": "Demo USB microphone", "unit_cents": 22_000,
                      "need": "recording", "features": {"usb", "monitoring"}, "utility": 2,
                      "description": "Synthetic catalog item. USB and headphone monitoring."},
@@ -22,7 +32,7 @@ PRODUCTS = {
 
 
 class Catalog:
-    def __init__(self, merchant="demo-merchant", products=None):
+    def __init__(self, merchant="demo-merchant", products: dict[str, Product] | None = None):
         self.merchant = merchant
         self.products = products if products is not None else PRODUCTS
 

@@ -1,0 +1,362 @@
+{
+  "kind": "actual_model_demo_observations",
+  "status": "sequential_shared_budget_recovery_verified",
+  "execution": "User ran source-checkout commands in their Terminal. Assistant inspected the saved local artifacts.",
+  "summary": {
+    "observed_sessions": 4,
+    "observed_agent_runs": 5,
+    "completed_agent_runs": 3,
+    "model_requests_attempted": 16,
+    "model_responses_received": 14,
+    "two_agent_demo_complete": true,
+    "denial_recovery_observed": true,
+    "concurrent_real_agent_runs": 0,
+    "paypal_calls": 0,
+    "baseline_runs": 0,
+    "ablation_runs": 0
+  },
+  "observations": [
+    {
+      "kind": "partial_actual_model_demo",
+      "status": "incomplete_transport_failure",
+      "observed_started_at_utc": "2026-10-19T21:15:12.840718+00:00",
+      "observed_finished_at_utc": "2026-10-19T21:16:08.762460+00:00",
+      "execution": "User ran python3 agent.py --demo in their own Terminal; recorded local artifacts were inspected by the assistant.",
+      "provider": "gemini",
+      "model": "gemini-3.8-flash",
+      "source_provenance": {
+        "source_revision": "93518ad26bfcd2fbe96b387b7a21b3491cc73ea3",
+        "source_tree_dirty": true,
+        "python": "3.14.7",
+        "command": "python agent.py (private arguments omitted)"
+      },
+      "source_record_sha256": "725acd004b0d7c203bd72b94a0ff11b4853ccf2c13a63a8d25f75923fba7eea5",
+      "model_requests_attempted": 2,
+      "model_responses_received": 1,
+      "observed_tools": [
+        {
+          "name": "get_skill",
+          "result": "returned",
+          "product_count": null
+        },
+        {
+          "name": "get_catalog",
+          "result": "returned",
+          "product_count": 4
+        }
+      ],
+      "known_usage_from_received_responses": {
+        "promptTokenCount": 519,
+        "candidatesTokenCount": 29,
+        "totalTokenCount": 655,
+        "thoughtsTokenCount": 107
+      },
+      "failed_request_usage": "unknown",
+      "failure": {
+        "code": "model_transport_error",
+        "http_status": null
+      },
+      "failure_detail": "Historical adapter returned a generic transport error. Timeout, TLS and disconnect causes were not distinguished; do not infer a specific cause.",
+      "elapsed_seconds": 55.92,
+      "agent_b": "not_run",
+      "purchase_proposals": 0,
+      "outcome": "no_purchase",
+      "final_demo_accounting": {
+        "available_cents": 35000,
+        "encumbered_cents": 0,
+        "spent_cents": 0
+      },
+      "paypal_calls": 0,
+      "scope": "Real Gemini response and actual scoped local HTTP tool calls with a synthetic catalog and financial plan. Disposable demo state; no purchases or payments.",
+      "not_proven": [
+        "Completed agent reservation",
+        "Denial recovery",
+        "Second model execution",
+        "Concurrency",
+        "Baseline/ablation",
+        "Provider billing tier or failed-request usage"
+      ]
+    },
+    {
+      "status": "incomplete_confirmed_request_timeout",
+      "started_at_utc": "2026-10-19T21:18:58.050531+00:00",
+      "finished_at_utc": "2026-10-19T21:19:58.159618+00:00",
+      "model": "gemini-3.8-flash",
+      "source_provenance": {
+        "source_revision": "93518ad26bfcd2fbe96b387b7a21b3491cc73ea3",
+        "source_tree_dirty": true,
+        "python": "3.14.7",
+        "command": "python agent.py (private arguments omitted)"
+      },
+      "source_record_sha256": "ab470208e7dde8e630c9f2bb1d772dc03131238bffa93ad32fd830f096946d59",
+      "model_requests_attempted": 1,
+      "model_responses_received": 0,
+      "tool_calls": 0,
+      "purchase_proposals": 0,
+      "failure": {
+        "code": "model_timeout",
+        "http_status": null
+      },
+      "elapsed_seconds": 60.109,
+      "configured_timeout_seconds": 60,
+      "agent_b": "not_run",
+      "failed_request_usage": "unknown",
+      "final_demo_accounting": {
+        "available_cents": 35000,
+        "encumbered_cents": 0,
+        "spent_cents": 0
+      },
+      "paypal_calls": 0
+    },
+    {
+      "status": "single_agent_reservation_verified",
+      "agent": "agent-b",
+      "started_at_utc": "2026-10-19T21:23:02.908143+00:00",
+      "finished_at_utc": "2026-10-19T21:23:36.126277+00:00",
+      "provider": "gemini",
+      "model": "gemini-3.5-flash-lite",
+      "source_provenance": {
+        "source_revision": "93518ad26bfcd2fbe96b387b7a21b3491cc73ea3",
+        "source_tree_dirty": true,
+        "python": "3.14.7",
+        "command": "python agent.py (private arguments omitted)"
+      },
+      "source_record_sha256": "db8ad781679b1f7ad76ed0ce5f32233d574700d7f69cd22fc29b4fef67067e0c",
+      "generation": {
+        "temperature": 0,
+        "max_output_tokens": 2048,
+        "request_timeout_seconds": 60
+      },
+      "model_requests_attempted": 4,
+      "model_responses_received": 4,
+      "tool_calls": 3,
+      "purchase_proposals": 1,
+      "tools": [
+        {
+          "name": "get_catalog",
+          "arguments": {},
+          "decision": null
+        },
+        {
+          "name": "get_skill",
+          "arguments": {
+            "resource": "propose-purchase"
+          },
+          "decision": null
+        },
+        {
+          "name": "propose_purchase",
+          "arguments": {
+            "items": [
+              {
+                "sku": "vacuum-standard",
+                "quantity": 1
+              }
+            ]
+          },
+          "decision": "reserved"
+        }
+      ],
+      "model_response_durations_seconds": [
+        16.722,
+        13.702,
+        1.459,
+        1.312
+      ],
+      "known_usage_from_received_responses": {
+        "promptTokenCount": 3570,
+        "candidatesTokenCount": 104,
+        "totalTokenCount": 3674
+      },
+      "elapsed_seconds": 33.218,
+      "outcome": "reserved_for_owner",
+      "reserved_item": {
+        "sku": "vacuum-standard",
+        "quantity": 1,
+        "amount_cents": 18000
+      },
+      "final_demo_accounting": {
+        "available_cents": 17000,
+        "encumbered_cents": 18000,
+        "spent_cents": 0
+      },
+      "provider_error": null,
+      "denial_recovery_observed": false,
+      "paypal_calls": 0,
+      "scope": "One actual scoped caller selected and reserved a synthetic catalog product, then explained the owner handoff. Temporary reservation only; demo ledger discarded at exit."
+    },
+    {
+      "status": "sequential_shared_budget_recovery_verified",
+      "started_at_utc": "2026-10-19T21:26:54.723595+00:00",
+      "finished_at_utc": "2026-10-19T21:27:04.785583+00:00",
+      "source_session_sha256": "e36352a64f3479c3722c15fd4ca6bba451b5d7ab5a1123e3bd5abbcc7fa55105",
+      "execution": "User ran GEMINI_MODEL_A=gemini-3.5-flash-lite python3 agent.py --demo in their Terminal; saved records inspected by assistant.",
+      "schedule": "Agent A completes before Agent B starts; no concurrent model requests.",
+      "model_scope": "One Gemini model, two distinct authenticated agent scopes and shopping tasks.",
+      "agents": [
+        {
+          "agent": "agent-a",
+          "provider": "gemini",
+          "model": "gemini-3.5-flash-lite",
+          "started_at_utc": "2026-10-19T21:26:54.797750+00:00",
+          "finished_at_utc": "2026-10-19T21:26:58.241972+00:00",
+          "source_provenance": {
+            "source_revision": "93518ad26bfcd2fbe96b387b7a21b3491cc73ea3",
+            "source_tree_dirty": true,
+            "python": "3.14.7",
+            "command": "python agent.py (private arguments omitted)"
+          },
+          "source_record_sha256": "c16b759996af40930cd5bfdfc0705e2d9904b3810db068a8a9db834ec3a49252",
+          "generation": {
+            "temperature": 0,
+            "max_output_tokens": 2048,
+            "request_timeout_seconds": 60
+          },
+          "prompt_sha256": "6c0893e5e28e094f5a8eaaa0de907309e0dd19cd8bd3fb7f8b65fee6d73dc134",
+          "tools_sha256": "6200907299c7cba0c6d37bfb9d922ae0baf98427a1d8d6ef99e9876a80f26b38",
+          "skill_sha256": {
+            "propose-purchase": "294d2fdc3eb4c69d0529e595fdd0ca63c1e05a4aae0202934bb01178bde69423",
+            "propose-purchase/denials": "734f9e9b5d5b54fad0a21bbc70c69a53505b931acee32e00a7197197a84c67ed"
+          },
+          "model_requests_attempted": 4,
+          "model_responses_received": 4,
+          "tool_calls": 3,
+          "tool_names": [
+            "get_catalog",
+            "get_skill",
+            "propose_purchase"
+          ],
+          "proposals": [
+            {
+              "items": [
+                {
+                  "quantity": 1,
+                  "sku": "mic-standard"
+                }
+              ],
+              "decision": "reserved",
+              "reason": null,
+              "reserved_amount_cents": 22000,
+              "counteroffers": []
+            }
+          ],
+          "outcome": "reserved_for_owner",
+          "provider_error": null,
+          "elapsed_seconds": 3.444,
+          "known_usage_from_received_responses": {
+            "promptTokenCount": 3570,
+            "candidatesTokenCount": 83,
+            "totalTokenCount": 3653
+          },
+          "model_handoff_message": "The standard USB microphone (`mic-standard`) featuring headphone monitoring has been successfully reserved for owner review at $220.00."
+        },
+        {
+          "agent": "agent-b",
+          "provider": "gemini",
+          "model": "gemini-3.5-flash-lite",
+          "started_at_utc": "2026-10-19T21:26:58.270892+00:00",
+          "finished_at_utc": "2026-10-19T21:27:04.743982+00:00",
+          "source_provenance": {
+            "source_revision": "93518ad26bfcd2fbe96b387b7a21b3491cc73ea3",
+            "source_tree_dirty": true,
+            "python": "3.14.7",
+            "command": "python agent.py (private arguments omitted)"
+          },
+          "source_record_sha256": "ff7a7281d88b5fc8dc085c898f8af8c7f0654e3d182236939900ecec8a0e380d",
+          "generation": {
+            "temperature": 0,
+            "max_output_tokens": 2048,
+            "request_timeout_seconds": 60
+          },
+          "prompt_sha256": "6c0893e5e28e094f5a8eaaa0de907309e0dd19cd8bd3fb7f8b65fee6d73dc134",
+          "tools_sha256": "6200907299c7cba0c6d37bfb9d922ae0baf98427a1d8d6ef99e9876a80f26b38",
+          "skill_sha256": {
+            "propose-purchase": "294d2fdc3eb4c69d0529e595fdd0ca63c1e05a4aae0202934bb01178bde69423",
+            "propose-purchase/denials": "734f9e9b5d5b54fad0a21bbc70c69a53505b931acee32e00a7197197a84c67ed"
+          },
+          "model_requests_attempted": 5,
+          "model_responses_received": 5,
+          "tool_calls": 4,
+          "tool_names": [
+            "get_catalog",
+            "propose_purchase",
+            "get_skill",
+            "propose_purchase"
+          ],
+          "proposals": [
+            {
+              "items": [
+                {
+                  "quantity": 1,
+                  "sku": "vacuum-standard"
+                }
+              ],
+              "decision": "denied",
+              "reason": "budget_exceeded",
+              "reserved_amount_cents": null,
+              "counteroffers": [
+                {
+                  "cart": {
+                    "items": [
+                      {
+                        "sku": "vacuum-budget",
+                        "quantity": 1
+                      }
+                    ]
+                  },
+                  "total_cents": 10000,
+                  "requires_new_proposal": true
+                }
+              ]
+            },
+            {
+              "items": [
+                {
+                  "sku": "vacuum-budget",
+                  "quantity": 1
+                }
+              ],
+              "decision": "reserved",
+              "reason": null,
+              "reserved_amount_cents": 10000,
+              "counteroffers": []
+            }
+          ],
+          "outcome": "reserved_for_owner",
+          "provider_error": null,
+          "elapsed_seconds": 6.473,
+          "known_usage_from_received_responses": {
+            "promptTokenCount": 4773,
+            "candidatesTokenCount": 155,
+            "totalTokenCount": 4928
+          },
+          "model_handoff_message": "The gateway initially denied the standard model (`vacuum-standard`) due to a budget constraint and returned a counteroffer for the compact model (`vacuum-budget`). Since your preference permitted a compact model with floor-cleaning capability as an alternative, I submitted a revised proposal for the compact vacuum (`vacuum-budget`), which has now been successfully reserved for owner review."
+        }
+      ],
+      "starting_discretionary_cents": 35000,
+      "final_demo_accounting": {
+        "available_cents": 3000,
+        "encumbered_cents": 32000,
+        "spent_cents": 0
+      },
+      "denial_recovery_observed": true,
+      "total_reserved_cents": 32000,
+      "paypal_calls": 0,
+      "not_proven": [
+        "Concurrency with real model callers",
+        "Different model/vendor compatibility",
+        "Repeated reliability or baseline comparisons",
+        "Owner purchase approval and payment in this combined demo"
+      ],
+      "demo_state": "Discarded at process exit; recorded reservations are not usable for checkout."
+    }
+  ],
+  "limitations": [
+    "Diagnostic configurations differ; aggregate counts are not a controlled success rate.",
+    "Two-agent success used the same Gemini model and sequential scheduling, with different authenticated scopes/tasks.",
+    "Synthetic catalog/plan. Temporary reservations were discarded; no purchase approval or PayPal payment occurred.",
+    "Failed-request usage and actual billing tier/cost remain unknown.",
+    "Gemini 3.8 Flash attempts remain incomplete and preserved in observations."
+  ],
+  "follow_up": "Core sequential shopping/recovery behavior is demonstrated once. Next implement owner-confirmed natural-language plan drafting, then owner interface and a combined sandbox flow. Repeated baseline/ablation and real-agent concurrency evidence remain pending."
+}
