@@ -19,6 +19,13 @@ different font rasterizers are not silently treated as equivalent. Linux CI
 baselines must be captured and visually reviewed on Linux before that job can
 pass. A missing baseline is a failure. CI never writes approved snapshots.
 
+The browser job uses Ubuntu 24.04. A deliberate `Checks` workflow dispatch also
+runs a separate Linux-candidate job: it captures missing references only and
+uploads the synthetic PNGs, source revision, environment and SHA-256 manifest.
+Review those images against the design system before adding them to Git; the
+job never commits them or changes the normal comparison gate. Existing references
+are never replaced by that capture command.
+
 For an intentional UI change, inspect the failed expected/actual/diff images,
 compare mobile and desktop against agent_docs/design-system.md, then explicitly
 update only the affected images with Playwright's `--update-snapshots` option.

@@ -49,13 +49,22 @@ async function focusInView(page: Page, control: Locator) {
 }
 
 async function tabTo(page: Page, control: Locator, tabKey: string) {
+  const traversal: unknown[] = [];
   for (let step = 0; step < 80; step++) {
     await page.keyboard.press(tabKey);
+    traversal.push(await page.evaluate(() => {
+      const active = document.activeElement;
+      return { tag: active?.tagName, id: active?.id, name: active?.getAttribute('aria-label'),
+        text: active?.textContent?.trim().slice(0, 100), scrollY };
+    }));
     if (await control.evaluate(element => element === document.activeElement)) {
       await focusInView(page, control);
       return;
     }
   }
+  await test.info().attach('failed-keyboard-traversal', {
+    body: JSON.stringify(traversal, null, 2), contentType: 'application/json',
+  });
   throw new Error(`Keyboard could not reach ${await control.getAttribute('aria-label') ?? await control.textContent()}`);
 }
 
