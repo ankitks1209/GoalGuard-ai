@@ -97,7 +97,7 @@ test('owner reviews a paired bill record and sees refreshed accounting and Timel
   await inspect(page, info, 'financial-record-review');
   await page.getByLabel('I confirm this already happened outside GoalGuard.').check();
   await page.getByRole('button', { name: 'Record this update' }).click();
-  await expect(page.locator('.cash-events').getByRole('status')).toContainText('Financial update recorded');
+  await expect(page.locator('.cash-events').getByRole('status').filter({ hasText: 'Financial update recorded' })).toHaveText('Financial update recorded. Review the refreshed budget and Timeline.');
   expect(requests).toEqual([{ event_id: expect.any(String), kind: 'bill_payment', amount_cents: 4000, reference_id: 'demo-bill' }]);
   await expect(page.locator('.amount')).toHaveText('$350.00');
   await page.getByRole('button', { name: 'Timeline', exact: true }).click();
@@ -126,6 +126,6 @@ test('a lost record response requires a read and never replays a mutation automa
   await expect(page.getByRole('button', { name: 'Retry this same record' })).toHaveCount(0);
   await inspect(page, info, 'financial-record-uncertain');
   await page.getByRole('button', { name: 'Check recorded status' }).click();
-  await expect(page.locator('.cash-events').getByRole('status')).toContainText('already recorded');
+  await expect(page.locator('.cash-events').getByRole('status').filter({ hasText: 'already recorded' })).toHaveText('This update was already recorded. It has not been counted again.');
   expect(calls).toBe(1);
 });

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import type { FormEvent } from 'react';
+import type { FocusEvent, FormEvent } from 'react';
 import { ApiError, OwnerApi } from './api';
 import type { Overview, Session } from './types';
 import { money } from './types';
@@ -15,6 +15,20 @@ const navigation = [
   { name: 'Timeline', label: 'timeline', description: 'events and decisions',
     path: 'M8 9H48V55H8Z M14 17H42 M14 24H42 M14 31H42 M14 38H34 M14 45H29' },
 ];
+
+function revealFocusedControl(event: FocusEvent<HTMLDivElement>) {
+  const control = event.target;
+  if (!(control instanceof HTMLElement) || !control.matches('input, select, textarea, button, summary')) return;
+  // WebKit may reveal the input caret while leaving the control border clipped.
+  // Check after native focus scrolling, and never pull focus back after it moves.
+  requestAnimationFrame(() => {
+    if (document.activeElement !== control) return;
+    const box = control.getBoundingClientRect();
+    if (box.top < 0 || box.left < 0 || box.bottom > innerHeight || box.right > innerWidth) {
+      control.scrollIntoView({ behavior: 'instant', block: 'center', inline: 'nearest' });
+    }
+  });
+}
 
 export function Setup() {
   const [session, setSession] = useState<Session | null>(null);
@@ -91,7 +105,7 @@ export function Setup() {
 
   const plan = session ? overview?.plan : null;
   return (
-    <div className="workspace">
+    <div className="workspace" onFocusCapture={revealFocusedControl}>
       <a className="skip" href="#main">Skip to content</a>
       <aside className="sidebar">
         <a className="brand" href="#main" aria-label="GoalGuard">goal<span>guard</span></a>

@@ -21,6 +21,40 @@ async function unlock() {
 }
 
 describe('owner workspace sessions', () => {
+  it('reveals the whole focused control when native focus scrolling clips its edge', async () => {
+    render(<Setup />);
+    const input = await screen.findByLabelText('Owner key');
+    const scroll = vi.fn();
+    input.scrollIntoView = scroll;
+    vi.spyOn(input, 'getBoundingClientRect').mockReturnValue({
+      top: window.innerHeight - 20, bottom: window.innerHeight + 14,
+      left: 16, right: 216, width: 200, height: 34,
+    } as DOMRect);
+    const frames: FrameRequestCallback[] = [];
+    vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => { frames.push(callback); return frames.length; });
+    input.focus();
+    frames.forEach(callback => callback(0));
+    expect(document.activeElement).toBe(input);
+    expect(scroll).toHaveBeenCalledWith({ behavior: 'instant', block: 'center', inline: 'nearest' });
+  });
+
+  it.each(['already visible', 'focus moved'])('does not scroll a control when %s', async state => {
+    render(<Setup />);
+    const input = await screen.findByLabelText('Owner key');
+    const scroll = vi.fn();
+    input.scrollIntoView = scroll;
+    vi.spyOn(input, 'getBoundingClientRect').mockReturnValue({
+      top: 16, bottom: state === 'already visible' ? 66 : window.innerHeight + 14,
+      left: 16, right: 216, width: 200, height: 50,
+    } as DOMRect);
+    const frames: FrameRequestCallback[] = [];
+    vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => { frames.push(callback); return frames.length; });
+    input.focus();
+    if (state === 'focus moved') input.blur();
+    frames.forEach(callback => callback(0));
+    expect(scroll).not.toHaveBeenCalled();
+  });
+
   it('checks the session, then unlocks with an ephemeral key and never persists credentials', async () => {
     const storage = vi.spyOn(Storage.prototype, 'setItem');
     render(<Setup />);

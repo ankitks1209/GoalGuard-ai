@@ -33,6 +33,10 @@ with a bounded wait for native scrolling to settle; do not force focus or scroll
 from the test to make it pass. Inspect the recorded traversal before repeating
 an unchanged keyboard failure.
 
+Scope status locators to their feature and expected message. A completion notice
+and pending-refresh status may briefly coexist; do not choose an arbitrary first
+match or assume there is only one live region.
+
 For an intentional UI change, inspect the failed expected/actual/diff images,
 compare mobile and desktop against agent_docs/design-system.md, then explicitly
 update only the affected images with Playwright's `--update-snapshots` option.
