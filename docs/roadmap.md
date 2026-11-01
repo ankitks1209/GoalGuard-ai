@@ -33,7 +33,8 @@
   coverage and build previously passed locally. CI/hook configuration is present;
   two new dependency guards now pass after the targeted Vitest 4.1.12 update,
   and the complete six-test frontend gate passes. The owner install-time audit
-  reported zero vulnerabilities. Hosted CI is unverified.
+  reported zero vulnerabilities. Subsequent hosted verification is recorded in
+  [browser CI repair](../agent_docs/browser-ci-repair.md).
 - Initial connected owner screens are implemented: manual plan setup with
   preview/confirmation, exact-cart purchase review, and the audit timeline.
   Built assets are served by Python on the API origin. Browser inspection used
@@ -60,6 +61,9 @@
   exposes the recorded amount/reference/ID for inspection after reload.
 - Verify the connected owner forms with a real model in a separately scoped
   synthetic run; UI fixtures and simulated extraction are not live AI evidence.
+- Hosted checks now pass Python 3.11/3.14, Frontend Node 24 and the Ubuntu 24.04
+  browser gate. Linux references were captured and visually reviewed separately;
+  native screen-reader and browser-zoom review remain open.
 - Explicit synthetic catalog and manual fulfilment labels.
 
 ## Evaluation and submission

@@ -55,8 +55,9 @@ exact-cart review, separate payment steps and a timeline. Optional AI drafting
 sends only a displayed built-in sample after consent; private financial text is
 not accepted. Financial activity records have their own review/confirmation and
 same-ID recovery after an uncertain response. These records do not move money.
-See [frontend setup](frontend/README.md) for checks and scope. Hosted CI and a new
-combined AI-to-payment demo remain unverified.
+See [frontend setup](frontend/README.md) for checks and scope and
+[browser CI repair](agent_docs/browser-ci-repair.md) for hosted verification.
+A new combined AI-to-payment demo remains unverified.
 
 ## How it works
 
@@ -100,9 +101,10 @@ python probe_evaluate.py
 
 The latest local working-tree verification records **227 passed, zero
 failures/errors/skips, nine TCP checks**, **85.30% branch-aware coverage**, and
-successful build/pre-commit gates. Frontend checks pass **52 tests**, with coverage
-above each configured 80% floor. This is not a committed-source or hosted-CI snapshot.
-See [owner-form verification](agent_docs/owner-form-verification.md).
+successful build/pre-commit gates. Frontend checks pass **55 tests**, with coverage
+above each configured 80% floor. See [owner-form verification](agent_docs/owner-form-verification.md)
+for its historical snapshot and [browser CI repair](agent_docs/browser-ci-repair.md)
+for current hosted-check scope and limits.
 
 The historical committed local snapshot records **155 passed, 0 failed, 0 skipped**, including
 eight TCP checks. Core sandbox evidence separately records a $1 capture, a same-key

@@ -21,14 +21,15 @@ built assets only; the Vite dev server on port 5173 has no owner-API proxy.
 This interface is for local development, synthetic catalog items, manual
 fulfilment and the PayPal sandbox. Public hosting remains out of scope.
 
-Current checks pass 52 frontend tests, lint, explicit typecheck, all coverage
+Current checks pass 55 frontend tests, lint, explicit typecheck, all coverage
 floors and build. Tests cover session handling, stale replies, manual plan
 preview/confirmation, exact consent, uncertain-payment refresh and timeline
 states. Browser inspection used a disposable synthetic household and verified
 unlocking, keyboard exact-cart approval and its timeline event at the available
 compact viewport. No model or payment provider was configured in that inspection.
-A complete new provider demonstration, native accessibility review, Firefox and
-Linux/hosted verification remain pending. Automated desktop/mobile rendering and
+A complete new provider demonstration and native accessibility review remain
+pending. Linux browser checks and reference review are tracked in
+[browser CI repair](../agent_docs/browser-ci-repair.md). Automated desktop/mobile rendering and
 an actual local HTTP/session/CSRF/ledger walkthrough used only synthetic data and
 simulated extraction. See [owner-form verification](../agent_docs/owner-form-verification.md).
 

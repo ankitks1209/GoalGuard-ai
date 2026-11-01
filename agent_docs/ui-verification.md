@@ -1,5 +1,8 @@
 # Owner UI verification
 
+For the subsequent Linux reference review and hosted browser-gate repair, see
+[browser CI repair](browser-ci-repair.md). The dated local review below is historical.
+
 Status: local review completed for launchable engines on 26 October 2026; Firefox,
 manual assistive-technology checks and Linux/hosted CI remain open. The three
 selected screen layouts are implemented. Local results below do not establish
