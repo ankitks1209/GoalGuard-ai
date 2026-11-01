@@ -102,6 +102,7 @@ jobs:
       - name: Capture missing Linux candidates without replacing existing references
         run: npx playwright test visual.spec.ts purchase-review.spec.ts timeline.spec.ts financial-ui.spec.ts --project=desktop --project=phone --project=narrow --update-snapshots=missing
       - name: Record candidate environment and hashes
+        if: always()
         env:
           CANDIDATE_REVISION: ${{ github.sha }}
         run: |

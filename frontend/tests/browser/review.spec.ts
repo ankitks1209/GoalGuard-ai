@@ -39,13 +39,14 @@ async function inspect(page: Page, browser: Browser, info: TestInfo, name: strin
 
 async function focusInView(page: Page, control: Locator) {
   await expect(control).toBeFocused();
-  const box = await control.boundingBox();
-  expect(box).not.toBeNull();
   const viewport = page.viewportSize()!;
-  expect(box!.x).toBeGreaterThanOrEqual(-1);
-  expect(box!.y).toBeGreaterThanOrEqual(-1);
-  expect(box!.x + box!.width).toBeLessThanOrEqual(viewport.width + 1);
-  expect(box!.y + box!.height).toBeLessThanOrEqual(viewport.height + 1);
+  // Native focus scrolling may finish after the key event. Keep the full-control
+  // bounds assertion, allowing only the configured assertion timeout to settle.
+  await expect.poll(async () => {
+    const box = await control.boundingBox();
+    return box !== null && box.x >= -1 && box.y >= -1 &&
+      box.x + box.width <= viewport.width + 1 && box.y + box.height <= viewport.height + 1;
+  }, { message: 'The entire focused control must be inside the viewport' }).toBe(true);
 }
 
 async function tabTo(page: Page, control: Locator, tabKey: string) {
@@ -106,7 +107,9 @@ test('keyboard reviews a plan and exact cart without confirming or paying', asyn
   await tabTo(page, page.getByRole('button', { name: 'Confirm this plan' }), tabKey);
   expect(previewRequests).toHaveLength(1);
   await inspect(page, browser, info, 'plan-review');
-  await tabTo(page, page.getByRole('button', { name: 'Purchases', exact: true }), tabKey);
+  // Return toward the header using native reverse traversal; Firefox does not
+  // wrap forward Tab from the last document control back through browser chrome.
+  await tabTo(page, page.getByRole('button', { name: 'Purchases', exact: true }), `Shift+${tabKey}`);
   await page.keyboard.press('Enter');
   const consent = page.getByRole('checkbox', { name: 'I approve these exact items and the $100.00 total.' });
   await tabTo(page, consent, tabKey);
@@ -117,7 +120,7 @@ test('keyboard reviews a plan and exact cart without confirming or paying', asyn
   await focusInView(page, approve);
   await expect(approve).toBeEnabled();
   // Leave approval and financial mutations to the owner; fixtures reject them.
-  await tabTo(page, page.getByRole('button', { name: 'Timeline', exact: true }), tabKey);
+  await tabTo(page, page.getByRole('button', { name: 'Timeline', exact: true }), `Shift+${tabKey}`);
   await page.keyboard.press('Enter');
   await tabTo(page, page.getByRole('button', { name: 'Refresh workspace' }), tabKey);
   await page.keyboard.press('Enter');
