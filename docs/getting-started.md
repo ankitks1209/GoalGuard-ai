@@ -3,6 +3,7 @@
 ## Requirements
 
 - Python 3.11 or newer.
+- Node 24/npm for the owner browser interface and frontend checks.
 - macOS or Linux for the current development workflow.
 - No PayPal or AI-provider account for the local demo and checks.
 
@@ -53,21 +54,40 @@ python server.py --state-dir ../goalguard-runtime --env-file .env --port 8765
 
 The API listens at `http://127.0.0.1:8765`. On first start it creates a bootstrap
 household and scoped credentials in `../goalguard-runtime/tokens.json`.
-Every route requires a bearer token. Tokens are not printed to the console;
-inspect them privately for your API client. Never give the owner token to a model.
+API clients use scoped bearer tokens. The owner browser exchanges its owner token
+for a temporary session; static assets are served without authentication. Tokens
+are not printed to the console; inspect them privately. Never give the owner token
+to a model.
 
 Purchasing stays disabled until the owner previews and confirms a plan through
-the [financial API](api.md). There is no owner browser interface yet.
+the owner interface or [financial API](api.md).
 Keep the same state directory across restarts. Do not reset a database with
 outstanding authorizations or uncertain payments. The default temporary state
 location is suitable only for disposable local rehearsals.
+
+## Open the owner interface
+
+From the source checkout, install the locked frontend dependencies and build:
+
+```sh
+npm --prefix frontend ci
+npm --prefix frontend run build
+```
+
+With the Python server above running, open `http://127.0.0.1:8765` and unlock
+privately with the local owner token. The build and API share one origin. Review
+and separately confirm the initial plan before agents propose purchases. Optional
+AI drafting sends only the displayed built-in synthetic sample after consent;
+model configuration is separate. Financial updates record activity already
+completed externally and do not move money. See [frontend setup](../frontend/README.md).
 
 ## Enable PayPal sandbox
 
 Follow [PayPal setup](paypal-setup.md), then restart the API with its configured
 `.env`. Genuine buyer approval is required before authorization. A localhost
-return page may refuse connection because callback UI is unfinished; the owner
-workflow verifies approval through PayPal's order API.
+return page may be unavailable because dedicated callback routes are unfinished;
+return to the owner interface and verify approval through the payment controls.
+The workflow checks PayPal's order API rather than trusting redirect parameters.
 
 ## Verification and next steps
 
@@ -79,4 +99,5 @@ python probe_evaluate.py
 The checks use temporary state, local TCP and fixture transports. They do not
 exercise live payment or model providers. See [evaluation](evaluation.md) for the
 separate sandbox evidence and [contributing](../CONTRIBUTING.md) for build tools.
-Real model integration and the owner interface are tracked in the [roadmap](roadmap.md).
+Real-model and owner-interface evidence, plus remaining combined-provider work,
+are tracked in the [roadmap](roadmap.md).

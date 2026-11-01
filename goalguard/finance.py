@@ -1,6 +1,6 @@
 """Deterministic USD plan validation and arithmetic; no model or payment I/O."""
 
-from datetime import date, datetime, time, timedelta, timezone
+from datetime import date, datetime, time, timedelta
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from .ledger import Rejection

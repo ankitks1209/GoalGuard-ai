@@ -1,0 +1,35 @@
+{
+  "kind": "synthetic_owner_ui_actual_local_http",
+  "observed_local_date": "2026-10-28",
+  "source": {
+    "base_revision": "93518ad",
+    "working_tree_dirty": true,
+    "components": "Built React interface, actual Python HTTP/session/CSRF/ledger; no API response interception"
+  },
+  "model_extraction": "Fixed simulated structured output injected into the existing PlanDrafter",
+  "real_model_calls": 0,
+  "paypal_calls": 0,
+  "external_browser_requests": 0,
+  "observed": {
+    "sample_draft_requests": 1,
+    "active_plan_before_separate_confirmation": false,
+    "separate_plan_confirmations": 1,
+    "financial_records": 2,
+    "bill_payment_cents": 4000,
+    "savings_deposit_cents": 2550,
+    "final_cash_base_cents": 53450,
+    "final_unpaid_bill_cents": 6000,
+    "final_saved_cents": 32550,
+    "final_remaining_contribution_cents": 7450,
+    "final_available_cents": 35000,
+    "captured_spend_cents": 0
+  },
+  "limits": [
+    "Synthetic household and fixed extraction; no real AI understanding, reliability or provider result established",
+    "Programmatic fixture-owner interactions are not a real household's consent",
+    "No checkout, authorization, capture, void or real money movement",
+    "Not a combined AI-to-PayPal demonstration or hosted judging build",
+    "Pending financial-record IDs survive locking in memory, not a page reload; inspect Timeline after reload",
+    "No manual screen-reader/native zoom, Firefox or Linux/hosted verification established by this run"
+  ]
+}

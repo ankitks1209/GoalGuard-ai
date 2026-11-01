@@ -1,0 +1,763 @@
+{
+  "info": {
+    "name": "GoalGuard synthetic API walkthrough",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Disposable synthetic API checks. No real AI callers, PayPal calls or actual owner finances. Run once against a fresh scripts/postman_fixture.py process. No payment routes are included."
+  },
+  "protocolProfileBehavior": {
+    "followRedirects": false
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "if (pm.environment.get(\"fixture_mode\") !== \"disposable-no-providers\" || !/^http:\\/\\/127\\.0\\.0\\.1:\\d+$/.test(pm.environment.get(\"base_url\") || \"\")) {",
+          "  pm.execution.skipRequest();",
+          "  throw new Error(\"Run only with scripts/postman_fixture.py and its disposable local environment.\");",
+          "}"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication is required",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/v1/catalog",
+        "description": "Authentication is required",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));",
+              "const data = pm.response.json();",
+              "pm.test(\"Missing credentials rejected\", () => pm.expect(data.reason).to.eql(\"unauthorized\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Agents cannot read owner plans",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/v1/plan",
+        "description": "Agents cannot read owner plans",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{agent_a_token}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));",
+              "const data = pm.response.json();",
+              "pm.test(\"Owner-only route rejected\", () => pm.expect(data.reason).to.eql(\"forbidden\"));",
+              "pm.test(\"No financial record returned\", () => pm.expect(data).not.to.have.property(\"plan\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Purchases need a confirmed plan",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/v1/proposals",
+        "description": "Purchases need a confirmed plan",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{agent_a_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"items\": [{\"sku\": \"mic-standard\", \"quantity\": 1}], \"request_key\": \"postman-mic\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 409\", () => pm.response.to.have.status(409));",
+              "const data = pm.response.json();",
+              "pm.test(\"No initial purchasing authority\", () => pm.expect(data.reason).to.eql(\"plan_required\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Owner previews synthetic protections",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/v1/plan/preview",
+        "description": "Owner previews synthetic protections",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{owner_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"mode\":\"activate\",\"plan\":{{demo_plan}}}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Only actual cash funds capacity\", () => pm.expect(data.summary.available_cents).to.eql(35000));",
+              "pm.test(\"Preview binds exact plan\", () => pm.expect(data.preview_hash).to.be.a(\"string\").and.not.empty);",
+              "pm.variables.set(\"preview_hash\", data.preview_hash);",
+              "pm.variables.set(\"reviewed_plan\", JSON.stringify(data.spec));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Preview has not activated the plan",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/v1/plan",
+        "description": "Preview has not activated the plan",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{owner_token}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Separate confirmation required\", () => pm.expect(data.plan).to.eql(null));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Owner confirms the exact synthetic plan",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/v1/plan/confirm",
+        "description": "Automatic confirmation is ONLY for the disposable synthetic fixture. This is not a real owner's consent.",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{owner_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"mode\":\"activate\",\"plan\":{{reviewed_plan}},\"preview_hash\":\"{{preview_hash}}\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Confirmed capacity is $350\", () => pm.expect(data.available_cents).to.eql(35000));",
+              "pm.test(\"Confirmed plan is ready\", () => pm.expect(data.status).to.eql(\"ready\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Catalog identifies synthetic products",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/v1/catalog",
+        "description": "Catalog identifies synthetic products",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{agent_a_token}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Catalog is explicitly synthetic\", () => pm.expect(data.simulation).to.eql(\"synthetic_catalog\"));",
+              "pm.test(\"All products are synthetic\", () => { pm.expect(data.products).to.have.length(4); data.products.forEach(p => pm.expect(p.synthetic).to.eql(true)); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Agent A reserves the microphone",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/v1/proposals",
+        "description": "Agent A reserves the microphone",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{agent_a_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"items\": [{\"sku\": \"mic-standard\", \"quantity\": 1}], \"request_key\": \"postman-mic\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Microphone reserved at server price\", () => { pm.expect(data.decision).to.eql(\"reserved\"); pm.expect(data.purchase.amount_cents).to.eql(22000); });",
+              "pm.test(\"No permit granted to agent\", () => pm.expect(data.purchase).not.to.have.property(\"permit\"));",
+              "pm.variables.set(\"purchase_id\", data.purchase.id);",
+              "pm.variables.set(\"cart_hash\", data.purchase.cart_hash);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Identical retry reuses the reservation",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/v1/proposals",
+        "description": "Identical retry reuses the reservation",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{agent_a_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"items\": [{\"sku\": \"mic-standard\", \"quantity\": 1}], \"request_key\": \"postman-mic\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Same purchase identity\", () => pm.expect(data.purchase.id).to.eql(pm.variables.get(\"purchase_id\")));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Changed cart cannot reuse its request key",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/v1/proposals",
+        "description": "Changed cart cannot reuse its request key",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{agent_a_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"items\": [{\"sku\": \"mic-budget\", \"quantity\": 1}], \"request_key\": \"postman-mic\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 409\", () => pm.response.to.have.status(409));",
+              "const data = pm.response.json();",
+              "pm.test(\"Changed payload rejected\", () => pm.expect(data.reason).to.eql(\"idempotency_conflict\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Agent B exceeds the shared allocation",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/v1/proposals",
+        "description": "Agent B exceeds the shared allocation",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{agent_b_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"items\": [{\"sku\": \"vacuum-standard\", \"quantity\": 1}], \"request_key\": \"postman-vacuum\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Shared allocation denies conflicting cart\", () => { pm.expect(data.decision).to.eql(\"denied\"); pm.expect(data.reason).to.eql(\"budget_exceeded\"); });",
+              "pm.test(\"One feasible alternative, no private balances\", () => { pm.expect(data.counteroffers).to.have.length(1); pm.expect(data.counteroffers[0].total_cents).to.eql(10000); pm.expect(data).not.to.have.property(\"available_cents\"); pm.expect(data).not.to.have.property(\"bills\"); });",
+              "pm.variables.set(\"counteroffer_items\", JSON.stringify(data.counteroffers[0].cart.items));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Agent B accepts the returned alternative",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/v1/proposals",
+        "description": "Agent B accepts the returned alternative",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{agent_b_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"items\":{{counteroffer_items}},\"request_key\":\"postman-vacuum-revised\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Revised request reserves $100\", () => { pm.expect(data.decision).to.eql(\"reserved\"); pm.expect(data.purchase.amount_cents).to.eql(10000); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Agent cannot approve its own purchase",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/v1/purchases/{{purchase_id}}/approve",
+        "description": "Agent cannot approve its own purchase",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{agent_a_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"cart_hash\":\"{{cart_hash}}\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));",
+              "const data = pm.response.json();",
+              "pm.test(\"Owner consent boundary enforced\", () => pm.expect(data.reason).to.eql(\"forbidden\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Owner consent must match exact cart",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/v1/purchases/{{purchase_id}}/approve",
+        "description": "Owner consent must match exact cart",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{owner_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"cart_hash\": \"changed-synthetic-cart\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 409\", () => pm.response.to.have.status(409));",
+              "const data = pm.response.json();",
+              "pm.test(\"Changed cart rejected\", () => pm.expect(data.reason).to.eql(\"cart_changed\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Fixture owner approves exact synthetic cart",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/v1/purchases/{{purchase_id}}/approve",
+        "description": "Synthetic authority check only. Do not repoint this collection at a real household. No payment endpoint follows this approval.",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{owner_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"cart_hash\":\"{{cart_hash}}\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Exact cart approved\", () => pm.expect(data.state).to.eql(\"approved\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Owner sees capacity counted once",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/v1/budget",
+        "description": "Owner sees capacity counted once",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{owner_token}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Reservations total $320 once\", () => pm.expect(data.encumbered_cents).to.eql(32000));",
+              "pm.test(\"Available cash is $30\", () => pm.expect(data.available_cents).to.eql(3000));",
+              "pm.test(\"No capture occurred\", () => pm.expect(data.spent_cents).to.eql(0));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Agent purchase status omits consent authority",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/v1/purchases/{{purchase_id}}",
+        "description": "Agent purchase status omits consent authority",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{agent_a_token}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Agent can see approved status\", () => pm.expect(data.state).to.eql(\"approved\"));",
+              "pm.test(\"Only scoped purchase fields returned\", () => pm.expect(data).to.have.all.keys(\"id\", \"cart_hash\", \"amount_cents\", \"expires_at\", \"state\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Owner can inspect the approval audit",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/v1/purchases/{{purchase_id}}/audit",
+        "description": "Owner can inspect the approval audit",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{owner_token}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Approval is audited\", () => pm.expect(data.events.some(e => e.event === \"approved\")).to.eql(true));"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

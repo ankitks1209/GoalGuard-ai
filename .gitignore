@@ -11,6 +11,23 @@ tokens.json
 *.signing-key
 .DS_Store
 .venv/
+.local/
 build/
 dist/
 *.egg-info/
+.ruff_cache/
+.mypy_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.pytest_cache/
+.claude/settings.local.json
+/.codex/config.toml
+node_modules/
+frontend/dist/
+frontend/coverage/
+*.tsbuildinfo
+
+# The reusable contributor contract is public; private handoffs remain excluded.
+!/AGENTS.md

@@ -2,7 +2,11 @@
 
 GoalGuard is a local Python backend with a SQLite ledger and a thin HTTP tool API.
 It protects an owner-confirmed financial plan while shopping callers propose
-purchases. The current callers are deterministic; real models are not connected.
+purchases. The local demo uses deterministic callers. A Gemini adapter and
+real-model CLI are implemented separately. Two Flash-Lite callers demonstrated
+one sequential shared-budget denial/recovery scenario through the scoped HTTP
+API. Both used the same model; real-agent concurrency remains unverified.
+Earlier incomplete Flash attempts are retained in the evidence.
 
 ```mermaid
 flowchart LR
@@ -28,7 +32,13 @@ flowchart LR
 | `goalguard/catalog.py` | Server-owned prices and deterministic alternatives in the synthetic catalog |
 | `goalguard/gateway.py` | Actor scopes, quota enforcement and payment coordination |
 | `goalguard/agent_view.py` | Allowlisted public agent responses |
-| `goalguard/runner.py` | Trusted dispatcher with an eight-call, one-revision limit; no live model adapter yet |
+| `goalguard/runner.py` | Trusted dispatcher with an eight-call, one-revision limit and fixed skill resources |
+| `goalguard/http_tools.py` | Agent-only loopback client; no owner or payment methods |
+| `goalguard/models.py` | Gemini transport, explicit configuration and provider failure classification |
+| `goalguard/shopping.py` | Bounded model/tool loop and private run records; one sequential scenario observed |
+| `goalguard/drafting.py` | Explicitly requested, schema-validated initial plan extraction; one real synthetic-input draft observed |
+| `agent.py` | Source-checkout caller using one scoped agent token and configurable model |
+| `draft_plan.py` | Disposable owner draft demonstration; never confirms a plan or calls PayPal |
 | `goalguard/paypal.py` | Fixed sandbox endpoint, provider calls and exact order/amount validation |
 | `server.py` | Loopback HTTP transport, scoped development tokens and expiry sweep |
 
@@ -96,7 +106,17 @@ retries reuse a quota slot. Decision outcomes still permit partial inference.
 
 The financial backend is locally verified. Core authorize/capture and
 authorize/void flows have separate actual sandbox evidence. That observation run
-predates the financial-plan integration. Model callers, natural-language plan
-drafting, owner UI/session protection and user validation remain unfinished.
+predates the financial-plan integration. Broader model caller verification,
+broader initial plan drafting evaluation, owner UI integration and user
+validation remain unfinished. One real synthetic-input extraction saved a draft
+without activation; it did not exercise shopping or PayPal.
+Local owner-session backend protection has deterministic handler and TCP
+tests: opaque 30-minute cookies, logout/restart invalidation, session-bound CSRF
+and expected Origin/Host. Session expiry preserves uncertain payments; fixture
+refresh after unlocking does not issue another capture. The initial frontend now
+handles unlocking, expiry, deliberate retry and the three owner screens. Built
+assets use the API origin. Browser inspection with disposable synthetic data
+verified unlocking, keyboard cart approval and timeline recording. AI drafting and
+paired financial-event UI, broader browser review and a combined provider flow remain.
 The [roadmap](roadmap.md), [evaluation](evaluation.md) and [security policy](../SECURITY.md)
 describe the remaining work and evidence limits.

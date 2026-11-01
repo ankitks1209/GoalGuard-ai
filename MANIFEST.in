@@ -1,6 +1,22 @@
 include .env.example CONTRIBUTING.md SECURITY.md agent-tools.json
+include AGENTS.md CLAUDE.md .pre-commit-config.yaml
+include docs/spec.md
+recursive-include agent_docs *.md
+recursive-include scripts *.py
+recursive-include postman *.md *.json
+recursive-include skills/write-spec *.md
+recursive-include skills/tdd-feature *.md
+recursive-include skills/code-review *.md
+recursive-include skills/ui-polish *.md
+recursive-include skills/debug *.md
+recursive-include skills/security-check *.md
 include docs/getting-started.md docs/architecture.md docs/financial-semantics.md
 include docs/api.md docs/evaluation.md docs/paypal-setup.md docs/roadmap.md
+include agent.py docs/agents.md
+include draft_plan.py
+include docs/plan-drafting.md
+recursive-include skills/propose-purchase *.md
+recursive-include goalguard/resources *.txt *.json
 include reports/README.md
 recursive-include reports *.json
 recursive-include prompts *.txt *.json

@@ -13,18 +13,48 @@ source .venv/bin/activate
 python -m pip install -e '.[dev]'
 ```
 
-The application has no third-party runtime dependencies. The `dev` extra installs
-the distribution build tool. Run commands from the repository root.
+The Python backend has no third-party runtime dependencies. The `dev` extra installs
+lint, typecheck, coverage, pre-commit and distribution build tools. Run commands from the repository root.
 
 ```sh
-python evaluate.py --require-tcp
-python probe_evaluate.py
-python demo.py
+python -m pre_commit install
+python scripts/pre_commit_tests.py
+python -m ruff check .
+python -m mypy
+python -m coverage run evaluate.py --report .local/checks/tests.json --require-tcp
+python scripts/check_test_report.py .local/checks/tests.json
+python -m coverage report
 python -m build
+python -m pre_commit run --all-files
 ```
 
 These commands use synthetic data, temporary databases and local TCP. They make
 no PayPal or model-provider requests and require no payment credentials.
+
+Read [AGENTS.md](AGENTS.md) and the [product spec](docs/spec.md) before changes.
+Follow observed red → green → refactor for new behavior; stop feature work when
+baseline tests fail. Failed/skipped/blocked checks are not passes. See
+[testing and hook setup](agent_docs/testing.md) for enforcement limits and
+[setup verification](agent_docs/setup-verification.md) for current blockers.
+The human retains architecture, correctness and quality ownership.
+
+## Owner frontend tooling
+
+Use Node 24/npm for the approved React/TypeScript/Vite frontend:
+
+```sh
+npm --prefix frontend ci
+npm --prefix frontend run check
+```
+
+The owner-generated lockfile is present. Source currently contains only a labelled
+development scaffold; its four initial tests, lint, typecheck, coverage and build passed.
+The frontend CI job and commit hook run `check`; hosted execution and required
+checks remain unverified. The targeted Vitest 4.1.12 update is installed and all
+six tests/full frontend gate pass; the owner install-time audit reported zero vulnerabilities;
+see [frontend setup and limits](frontend/README.md).
+The Python gates above still apply. No owner flow, browser session or payment
+integration is established by the frontend scaffold.
 
 ## Changes and pull requests
 

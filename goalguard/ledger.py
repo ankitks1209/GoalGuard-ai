@@ -535,6 +535,25 @@ class Ledger:
             row = self._purchase(db, purchase)
             return {**self._public(row), "cart": json.loads(row["cart_json"])}
 
+    def owner_activity(self, household: str):
+        """Private owner projection; callers must authenticate owner scope first."""
+        with self._transaction() as db:
+            self._household(db, household)
+            self._expire(db, household)
+            purchases = []
+            for row in db.execute("SELECT * FROM purchases WHERE household=? ORDER BY rowid DESC", (household,)):
+                operation = db.execute("SELECT id FROM operations WHERE purchase=? ORDER BY rowid DESC LIMIT 1",
+                                       (row["id"],)).fetchone()
+                purchases.append({**self._public(row), "cart": json.loads(row["cart_json"]),
+                                  "permit": row["permit"],
+                                  "operation_id": operation["id"] if operation else None})
+            events = [{"id": f"purchase-{row['sequence']}", "at": row["at"],
+                       "event": row["event"], "purchase_id": row["purchase"],
+                       "details": json.loads(row["details_json"])} for row in db.execute(
+                           """SELECT e.* FROM events e JOIN purchases p ON e.purchase=p.id
+                           WHERE p.household=? ORDER BY e.sequence DESC""", (household,))]
+            return {"purchases": purchases, "events": events}
+
     def audit(self, purchase: str):
         with self._transaction() as db:
             self._purchase(db, purchase)

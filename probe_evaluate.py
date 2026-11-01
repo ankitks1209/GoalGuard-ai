@@ -20,7 +20,7 @@ def probe(headroom, limit):
         gateway = Gateway(ledger, catalog, proposal_limit=limit)
         actor = Principal("probe", "probe-agent", "agent")
         low, high, reserved = 0, 100, 0
-        transcript = []
+        transcript: list[dict[str, object]] = []
         while low < high:
             target = (low + high + 1) // 2
             amount = target - reserved
