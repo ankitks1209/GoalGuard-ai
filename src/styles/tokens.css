@@ -24,6 +24,13 @@
   --color-warning: var(--color-ink);
   --color-error: var(--color-ink);
   --color-dialog-shadow: rgb(32 35 31 / 16%);
+  --color-budget-panel: #173450;
+  --color-budget-detail: #dbe7f2;
+  --color-budget-protected: #c49b75;
+  --color-budget-committed: #7098b4;
+  --color-budget-spendable: var(--color-surface);
+  --color-budget-action: #1c4266;
+  --color-budget-rule: #b5c4d1;
 
   --font-body: "Instrument Sans", system-ui, sans-serif;
   --font-weight-regular: 400;
@@ -34,6 +41,10 @@
   --font-size-section: 1.625rem;
   --font-size-headline: clamp(2.5rem, 5.4vw, 4.375rem);
   --font-size-amount: clamp(4rem, 12vw, 9.75rem);
+  --font-size-budget-heading: clamp(2rem, 4.2vw, 3.75rem);
+  --font-size-budget-amount: clamp(3.625rem, 9vw, 8rem);
+  --font-size-amount-long: clamp(1.5rem, 5vw, 4rem);
+  --budget-panel-padding: var(--space-8);
   --line-height-body: 1.5;
   --line-height-heading: 0.98;
   --line-height-amount: 1.05;
@@ -103,6 +114,7 @@
     --page-gutter: var(--space-6);
     --font-size-navigation: 1.25rem;
     --font-size-amount: clamp(4rem, 17vw, 8.125rem);
+    --budget-panel-padding: var(--space-6);
     --navigation-columns: repeat(3, minmax(0, 1fr));
     --navigation-brand-column: 1 / -1;
     --navigation-item-display: block;

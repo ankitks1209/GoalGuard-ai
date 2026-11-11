@@ -72,6 +72,42 @@ existing2px ink stroke and4px spacing tokens. Retain26px brand size, navigation
 tracking/line-height and the accessible name “GoalGuard”. No separate symbol,
 new color or motion. This replaces the earlier stacked name.
 
+## Confirmation feedback — 1 November 2026
+
+The owner requested the budget directly after confirming a plan. Once confirmation
+and the subsequent overview read succeed, focus and instantly reveal the existing
+budget heading. Collapse the setup editor and show confirmed bills, buffer,
+remaining savings contribution and expected income using the existing flat layout
+and tokens. “Edit plan” reopens the retained form and focuses current cash; every
+change still needs a fresh preview and separate confirmation. Financial updates
+remain available. A failed/missing budget read or expired session must not trigger
+this transition or replay confirmation. No new animation or visual identity choice.
+
+## Night horizon Budget screen
+
+The owner selected Night horizon on 5 November and locked the allocation-bar
+version on 11 November after reviewing a static preview. The Unslop audit found
+that the generic headline competed with the amount and the proposed background
+art distracted from it on phones. Keep the existing light workspace, Instrument
+Sans, connected wordmark, flat rows and instant feedback. Lead with “Safely
+spendable” and confine the richer color to the balance panel and Budget actions.
+Review this first screen with the owner before styling Purchases or Timeline.
+
+The navy panel uses white for the balance and light blue for the explanatory
+text. Copper shows protected cash, muted blue shows purchase commitments and
+white shows spendable cash. Proportions use the confirmed amounts returned by
+the ledger. After a capture the bar represents the cash left after that spending.
+The bar requires a positive, internally consistent allocation with requests
+enabled. When requests are paused the screen shows the balance or shortfall and
+explains the pause. A text equivalent gives the allocation amounts to screen
+readers. The legend wraps below the bar on narrow screens.
+
+White and explanatory text have 12.78:1 and 10.18:1 contrast against the navy
+panel. White against the blue primary button has 10.39:1 contrast. Reviewed the
+actual synthetic workspace at 1440 and 375 CSS pixels and checked reflow and
+post-confirmation focus at 320, 375 and 1440. Native screen-reader review is open.
+The audit workflow follows [Unslop by Damir Sokolovsky](https://github.com/heydamir/unslop).
+
 ## Purchase review layout — A selected
 
 On23 October2026 the owner authorized beginning the Purchase review design pass.

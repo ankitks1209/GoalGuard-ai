@@ -104,12 +104,18 @@ class PayPal:
         }
         request_id = str(uuid.uuid5(uuid.NAMESPACE_URL, "goalguard:create:" + purchase["id"]))
         response = self._request("POST", "/v2/checkout/orders", body, request_id)
-        approval_url = next((link["href"] for link in response.get("links", [])
+        return self.checkout_details(response)
+
+    @staticmethod
+    def checkout_details(order):
+        approval_url = next((link["href"] for link in order.get("links", [])
                              if link.get("rel") in ("approve", "payer-action")), None)
-        if not response.get("id") or not approval_url:
+        if not order.get("id") or (not approval_url and order.get("status") != "APPROVED"):
             raise PaymentUnavailable("PayPal did not return a buyer approval link.")
-        return {"order_id": response["id"], "approval_url": approval_url,
-                "sandbox": True, "fulfilment": "manual_demo_action"}
+        result = {"order_id": order["id"], "sandbox": True, "fulfilment": "manual_demo_action"}
+        if order.get("status") != "APPROVED":
+            result["approval_url"] = approval_url
+        return result
 
     def get_order(self, order_id):
         return self._request("GET", "/v2/checkout/orders/" + order_id)

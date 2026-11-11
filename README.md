@@ -14,7 +14,9 @@ can continue through PayPal sandbox checkout with exact-cart consent and an audi
 > Both used the same model; earlier incomplete Flash attempts remain documented.
 > The owner interface connects manual plan setup, sample-only AI drafting,
 > financial activity records, exact-cart review and the timeline.
-> A complete combined AI-to-payment demonstration remains pending.
+> A real Gemini proposal reached owner consent and sandbox order creation on
+> November 3. Buyer checkout stopped at a seller currency error.
+> [Combined run evidence](reports/combined-demo-2026-11-03.json)
 > The local `demo.py` uses deterministic callers.
 
 ## What works
@@ -27,6 +29,9 @@ can continue through PayPal sandbox checkout with exact-cart consent and an audi
 - Scoped agent tools, bounded proposal recovery and allowlisted financial responses.
 
 ## Quick start
+
+For a browser walkthrough with a prepared synthetic household and no provider
+keys, see [the local judging build](docs/judging.md).
 
 Requires **Python 3.11+**. The Python runtime has no third-party dependencies.
 
@@ -99,10 +104,10 @@ python evaluate.py --require-tcp
 python probe_evaluate.py
 ```
 
-The latest local working-tree verification records **227 passed, zero
-failures/errors/skips, nine TCP checks**, **85.30% branch-aware coverage**, and
-successful build/pre-commit gates. Frontend checks pass **55 tests**, with coverage
-above each configured 80% floor. See [owner-form verification](agent_docs/owner-form-verification.md)
+The November 11 local working-tree verification records **231 passed, zero
+failures/errors/skips, nine TCP checks**, **85.43% branch-aware coverage**, and
+successful build/pre-commit gates. The frontend gate passed with **93.57% branch
+coverage**. See [owner-form verification](agent_docs/owner-form-verification.md)
 for its historical snapshot and [browser CI repair](agent_docs/browser-ci-repair.md)
 for current hosted-check scope and limits.
 

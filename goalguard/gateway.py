@@ -146,7 +146,12 @@ class Gateway:
         current = self.catalog.quote([{"sku": i.sku, "quantity": i.quantity} for i in cart.items])
         if current.cart_hash != cart.cart_hash:
             raise Rejection("cart_changed", "Catalog price changed; obtain a new approval.")
-        result = self.paypal.create_order(row, cart)
+        if row["order_id"]:
+            order = self.paypal.get_order(row["order_id"])
+            self.paypal.validate_order(order, row, cart)
+            result = self.paypal.checkout_details(order)
+        else:
+            result = self.paypal.create_order(row, cart)
         self.ledger.bind_order(purchase, result["order_id"])
         return result
 
