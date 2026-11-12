@@ -1,0 +1,33 @@
+{
+  "kind": "partial_combined_provider_demo",
+  "observed_date": "2026-11-03",
+  "timezone": "Asia/Kolkata",
+  "source": {
+    "base_revision": "bd78c5279215bb8309ad9e295d113a281322dc9f",
+    "working_tree_dirty": true,
+    "python": "3.14.7"
+  },
+  "proposal": {
+    "provider": "gemini",
+    "configured_model": "gemini-3.5-flash-lite",
+    "model_requests": 4,
+    "tool_calls": ["get_catalog", "get_skill", "propose_purchase"],
+    "outcome": "reserved_for_owner",
+    "sku": "mic-standard",
+    "quantity": 1,
+    "total_cents": 22000,
+    "currency": "USD"
+  },
+  "checkout": {
+    "environment": "paypal_sandbox",
+    "owner_exact_cart_consent_recorded": true,
+    "order_intent": "AUTHORIZE",
+    "verified_order_status_before_buyer_action": "PAYER_ACTION_REQUIRED",
+    "verified_order_terms_match_approved_cart": true,
+    "buyer_checkout_error": "UNSUPPORTED_PAYEE_CURRENCY",
+    "authorization_recorded_at_last_inspection": false,
+    "capture_recorded_at_last_inspection": false
+  },
+  "status": "stopped_at_buyer_checkout",
+  "limits": "One scoped proposal in a synthetic household. The checkout error was observed in the buyer UI. The seller account setting responsible for it was unverified. Plan extraction provenance was unverified for this household."
+}

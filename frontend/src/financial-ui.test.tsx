@@ -336,8 +336,9 @@ it('switches a confirmed initial draft to revision mode for the next deliberate 
   await openDraft();
   fireEvent.click(screen.getByLabelText('I agree to send this sample to Google Gemini for drafting.'));
   fireEvent.click(screen.getByRole('button', { name: 'Create sample AI draft' }));
+  screen.getByRole('heading', { level: 1 }).scrollIntoView = vi.fn();
   fireEvent.click(await screen.findByRole('button', { name: 'Confirm this plan' }));
-  await screen.findByRole('heading', { name: 'Your financial plan' });
+  fireEvent.click(await screen.findByRole('button', { name: 'Edit plan' }));
   expect(screen.getByLabelText('Plan change')).toHaveProperty('value', 'revise');
   expect(JSON.parse(String(posts('/v1/plan/confirm')[0]?.[1]?.body)).mode).toBe('activate');
   fireEvent.click(screen.getByRole('button', { name: 'Preview protections' }));

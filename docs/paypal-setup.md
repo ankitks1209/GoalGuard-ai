@@ -17,6 +17,15 @@ checkout displayed a currency error; a US buyer in a fresh browser session later
 succeeded with the same IN seller. Those changes were not isolated, so the exact
 earlier cause remains unconfirmed.
 
+If sandbox checkout reports `UNSUPPORTED_PAYEE_CURRENCY`, check the seller
+linked to the app and its USD receiving preferences. For the next test, use a
+US Personal sandbox buyer with test funds in a separate browser session. If the
+seller cannot receive USD, configure a USD-capable Business sandbox seller and
+use the REST app credentials and merchant ID for that same account. The
+[November 3 run](../reports/combined-demo-2026-11-03.json) reached order creation
+before this error stopped buyer checkout.
+[PayPal currency settings](https://developer.paypal.com/api/codes/currency)
+
 ## 2. Create an app
 
 Under **Apps & Credentials**, select **Sandbox → Create App**. Name the app
@@ -31,7 +40,7 @@ Account Settings. The merchant ID differs from the email and REST Client ID.
 
 ## 3. Configure the checkout
 
-From the repository root:
+If you need to create the configuration file, run this from the repository root:
 
 ```sh
 cp .env.example .env
@@ -66,10 +75,13 @@ as described in [Getting started](getting-started.md).
    an uncaptured authorization, void it instead and verify provider status.
 7. If a response is unavailable, keep the obligation and use status refresh.
 
-The localhost callback UI is unfinished. A redirect may refuse connection;
-redirect parameters alone do not prove approval. The gateway checks the provider
-order and validates merchant, cart and amount before authorization. An Order
-marked `COMPLETED` can still contain only an authorization; it does not prove capture.
+In the browser, open **Purchases**, approve the exact cart, and create the
+sandbox checkout. After buyer approval, return to the same workspace and choose
+**Verify buyer approval and authorize**. For a local walkthrough, configure the
+return and cancel URLs to the running workspace root. The gateway checks the
+provider order and validates merchant, cart and amount before authorization.
+An order marked `COMPLETED` can still contain only an authorization. Confirm
+capture separately from the Payments resource and ledger.
 
 See [API](api.md), [evaluation](evaluation.md), [PayPal REST setup](https://developer.paypal.com/api/get-started/)
 and [sandbox account documentation](https://developer.paypal.com/sandbox-testing/accounts).

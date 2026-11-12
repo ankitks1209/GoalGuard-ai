@@ -155,6 +155,28 @@ class GatewayTests(unittest.TestCase):
         self.assertEqual(order["purchase_units"][0]["amount"]["value"], "220.00")
         self.assertEqual(order["purchase_units"][0]["payee"]["merchant_id"], "fixture-merchant")
 
+    def test_reopening_checkout_reads_the_bound_order_and_reuses_its_link(self):
+        approved = self.approved()
+        self.paypal.calls.clear()
+        result = self.gateway.checkout(self.owner, approved["id"])
+        self.assertEqual(result["order_id"], "order-1")
+        self.assertEqual(result["approval_url"], self.paypal.order["links"][0]["href"])
+        self.assertEqual(self.paypal.calls, [("GET", "/v2/checkout/orders/order-1", None, None)])
+
+    def test_reopening_checkout_rejects_changed_order_terms(self):
+        approved = self.approved()
+        self.paypal.order["purchase_units"][0]["amount"]["value"] = "221.00"
+        self.expect("paypal_order_changed", self.gateway.checkout, self.owner, approved["id"])
+
+    def test_reopening_an_already_approved_checkout_needs_no_new_link(self):
+        approved = self.approved()
+        self.paypal.order.update(status="APPROVED", links=[])
+        self.paypal.calls.clear()
+        result = self.gateway.checkout(self.owner, approved["id"])
+        self.assertEqual(result["order_id"], "order-1")
+        self.assertNotIn("approval_url", result)
+        self.assertEqual(self.paypal.calls, [("GET", "/v2/checkout/orders/order-1", None, None)])
+
     def test_early_authorize_click_does_not_strand_budget(self):
         approved = self.approved()
         self.expect("buyer_approval_required", self.gateway.execute,

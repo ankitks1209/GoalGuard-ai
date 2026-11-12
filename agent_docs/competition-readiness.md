@@ -1,17 +1,15 @@
 # PayPal AI Hackathon readiness
 
-Checked 27 October 2026. This is a requirements map and proposed work order,
-not an eligibility guarantee or evidence of a new provider run. The owner wants
-to finish while making useful use of sponsor products. Postman is now exercised;
-APIMatic is being assessed. Channel3 scope is not approved by that request.
-The empty root `COMPETITION_RULES.md` was preserved.
+Updated 11 November 2026. This maps the verified submission requirements and
+the remaining release work. Postman has been exercised and Astropods account
+setup is pending. Channel3 discovery remains outside the agreed catalog scope.
 
 ## Official requirements versus project checks
 
 The [official rules](https://paypalaihackathon.devpost.com/rules) require central
 PayPal sandbox integration and meaningful AI. Partner tools are optional;
 sponsor prizes have additional tool requirements. Submission closes
-12 November 2026 at noon Pacific. A working build needs complete local run
+12 November 2026 at noon PST (13 November at 1:30 a.m. IST). A working build needs complete local run
 instructions or hosting, public licensed source, a description and a public
 YouTube demonstration under three minutes. The overview also asks entrants to
 identify their tools and explain their use. See the
@@ -20,12 +18,12 @@ identify their tools and explain their use. See the
 | Item | Why it is on our plan | Current evidence or gap |
 | --- | --- | --- |
 | Manual accessibility review | Screen-reader narration and native zoom need hands-on inspection beyond automated assertions | Automated axe, keyboard and reflow evidence exists; native checks remain open |
-| Firefox verification | Detect browser-specific interaction failures | Local engine fails before page execution; no Firefox pass claimed |
-| Linux/hosted CI | Check the reproducible judging setup outside this Mac | Workflow exists; current dirty tree has not run remotely; Linux screenshot references remain open |
+| Firefox verification | Detect browser-specific interaction failures | Passed in the earlier hosted checkpoint. The current changes still need their own hosted Firefox result |
+| Linux/hosted CI | Check the reproducible judging setup outside this Mac | Last hosted green run predates the current changes. Review updated Ubuntu Budget screenshots and rerun the unchanged comparison gate |
 | AI drafting and financial-update UI | Complete the agreed owner experience | Browser forms implemented with sample-only drafting and explicit financial-record review; fresh browser-to-model run remains pending |
-| Combined AI → consent → sandbox demonstration | Demonstrate the actual product and its authority boundaries | Separate real-model and PayPal demonstrations exist; combined flow is pending |
+| Combined AI → consent → sandbox demonstration | Demonstrate the actual product and its authority boundaries | November 3 reached real-model proposal, owner consent and sandbox order creation, then stopped at a payee currency error. October 17 verified capture and void separately |
 | Repeated AI evaluation and user feedback | Support reliability and problem-fit claims | Limited model observations exist; repeated comparison and five consented conversations remain project goals |
-| Runnable build, description and video | Let judges reproduce and assess the entry | Packaging smoke passed previously; complete judging walkthrough and recording remain pending |
+| Runnable build, description and video | Let judges reproduce and assess the entry | [Local judging build](../docs/judging.md) verified from a clean extraction on macOS at desktop and phone widths. Submission text and a short recording are prepared locally. Publish the source and public YouTube URL before completing Devpost |
 
 The rules do not prescribe Firefox, Linux CI, a named accessibility test suite,
 five interviews or a second model vendor. These are engineering/research goals.
@@ -45,7 +43,7 @@ prize eligibility remain unverified.
 | Postman | Reproducible API requests, assertions and judging instructions | Actual CLI 1.80.0 execution passed 18 requests/45 assertions against disposable synthetic state; collection, blank template and instructions in [postman](../postman/README.md) |
 | APIMatic | PayPal API context for development of the integration | Official ContextMatic endpoint reached but returned HTTP 401 requiring OAuth; no successful context lookup or integration claim |
 | Channel3 | External product discovery and enrichment | Strong product fit, but expands the agreed synthetic catalog; needs an owner decision and a separate discovery/checkout contract first |
-| Astropods | Managed agent runtime or model gateway | Optional alternative, not a verified need; account/model access and adapter work remain unverified |
+| Astropods | Sponsor model gateway for shopping tool calls and synthetic plan extraction | Candidate replacement for Gemini. The documented Chat Completions endpoint supports client-defined tools. Account access, model availability and live behavior still need verification. [Sponsor signup](https://paypalaihackathon.devpost.com/details/astropods) · [Gateway API](https://docs.astropods.com/ai-gateway/chat) |
 | Render | Hosted judge access | Optional; first review the loopback-only server, persistent state, sessions and deployment scope; no deployment recipe has been validated |
 
 Primary sponsor resources:
@@ -61,23 +59,21 @@ Primary sponsor resources:
 - [Astropods resources](https://paypalaihackathon.devpost.com/details/astropods)
   and [Render resources](https://paypalaihackathon.devpost.com/details/render).
 
-## Proposed sequence
+## Deadline sequence
 
-1. Keep the agreed synthetic catalog while finishing. Postman supports the
-   current API; APIMatic requires an authenticated connection before further use.
-   Adding external catalog discovery still needs a separate owner decision.
-2. Completed first Postman run against disposable synthetic state; see
-   [sanitized evidence](../reports/postman-demo.json). Keep environment files and
-   raw run records private; no cloud workspace was created or published.
-3. Owner forms implemented: sample-only AI drafting, explicit consent, manual
-   fallback, exact-plan confirmation and paired financial-event review/recovery.
-   See [verification](owner-form-verification.md); no new real-model run claimed.
-4. Scope a fresh model → proposal → owner review → PayPal sandbox run. Obtain
-   the required live-run authorization, use synthetic finances and manual buyer
-   approval, and preserve sanitized evidence. No payment action is authorized by
-   this document.
-5. Complete the runnable judging instructions, focused evaluation and video.
-   Review public artifacts before any authorized publication/submission.
+1. Publish reviewed submission source through a pull request. Check Python,
+   Node and browser results on that revision. The changed Budget visuals need
+   Ubuntu reference candidates reviewed before the final screenshot comparison.
+2. Upload the reviewed video to YouTube. Add its public URL, the public licensed
+   repository and the complete judging instructions to the Devpost form.
+3. In parallel, claim Astropods access and confirm the workspace's gateway model
+   and usage limits. The documented local development path injects the gateway
+   host, credential and model into an authenticated Astropods project. GoalGuard
+   still needs the adapter and a scoped live run to verify the replacement.
+4. Check the PayPal Business sandbox seller can receive USD, and use a compatible
+   Personal sandbox buyer. Then scope a fresh combined run through owner consent,
+   buyer approval and the sandbox payment lifecycle. Use the existing
+   [PayPal setup](../docs/paypal-setup.md) and preserve sanitized evidence.
 
 ## Decisions still needed
 

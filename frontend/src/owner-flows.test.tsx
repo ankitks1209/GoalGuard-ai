@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { Setup } from './Setup';
 import type { Overview, Purchase } from './types';
@@ -101,6 +101,19 @@ it('opens an exact-cart review from the budget summary without granting consent 
   fireEvent.click(review);
   expect(await screen.findByRole('button', { name: 'Approve exact cart' })).toHaveProperty('disabled', true);
   expect(screen.getByLabelText(/I approve these exact items/)).toHaveProperty('checked', false);
+  expect(fetcher.mock.calls.some(([, init]) => init?.method === 'POST')).toBe(false);
+});
+
+it('focuses the selected budget request when the same agent has multiple carts', async () => {
+  overview.purchases = [purchase, { ...purchase, id: 'second-cart', amount_cents: 12000,
+    cart: { ...purchase.cart, items: [{ sku: 'mic-budget', quantity: 1, unit_cents: 12000 }] } }];
+  render(<Setup />);
+  const requests = await screen.findByRole('region', { name: 'Purchase requests' });
+  const second = within(requests).getByText('$120.00').closest('li')!;
+  fireEvent.click(within(second).getByRole('button', { name: 'Review cart from agent-a' }));
+  const selected = screen.getByRole('article', { name: 'Purchase second-cart' });
+  expect(document.activeElement).toBe(within(selected).getByRole('heading', { name: 'agent-a' }));
+  expect(within(selected).getByRole('button', { name: 'Approve exact cart' })).toHaveProperty('disabled', true);
   expect(fetcher.mock.calls.some(([, init]) => init?.method === 'POST')).toBe(false);
 });
 

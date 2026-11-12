@@ -98,8 +98,10 @@ transport result retains the old key for an idempotent retry.
 
 Owner approval returns a signed `permit` binding exact terms. It is an authority
 credential and must remain outside model context. Checkout creates the PayPal
-buyer-approval URL. The owner completes approval manually before authorization;
-capture represents manual demo fulfilment. Void cancels an uncaptured authorization.
+order for an approved cart. For a cart with an existing order, checkout reads
+and validates that order and returns its buyer approval link when needed.
+The owner completes buyer approval manually before authorization. Capture
+represents manual demo fulfilment. Void cancels an uncaptured authorization.
 Unknown outcomes stay committed until status refresh. See [PayPal setup](paypal-setup.md).
 
 ## Financial plan routes

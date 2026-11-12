@@ -24,7 +24,10 @@ function fromSpec(spec: PlanSpec): Form {
     saved: spec.goal ? dollars(spec.goal.current_saved_cents) : '', deadline: spec.goal?.target_date ?? '', contribution: spec.goal ? dollars(spec.goal.contribution_cents) : '' };
 }
 
-export function PlanEditor({ api, overview, version, onRefresh }: { api: OwnerApi; overview: Overview | null; version: string; onRefresh: () => Promise<void> }) {
+export function PlanEditor({ api, overview, version, budgetView, onEdit, onRefresh }: {
+  api: OwnerApi; overview: Overview | null; version: string; budgetView: boolean;
+  onEdit: () => void; onRefresh: (afterConfirmation?: boolean) => Promise<void>;
+}) {
   const [form, setForm] = useState<Form>(blank);
   const [mode, setMode] = useState('activate');
   const [preview, setPreview] = useState<Preview | null>(null);
@@ -35,11 +38,16 @@ export function PlanEditor({ api, overview, version, onRefresh }: { api: OwnerAp
   const dirty = useRef(false);
   const running = useRef(false);
   const generation = useRef(0);
+  const editor = useRef<HTMLDivElement>(null);
+  const editing = useRef(false);
   useEffect(() => {
     const source = overview?.draft?.spec ?? overview?.plan?.spec;
     if (!dirty.current && source) { setForm(fromSpec(source)); setMode(overview?.draft?.mode ?? 'revise'); }
   }, [overview]);
   useEffect(() => { generation.current++; setPreview(null); setError(''); }, [version]);
+  useEffect(() => {
+    if (!budgetView && editing.current) { editing.current = false; editor.current?.querySelector('input')?.focus(); }
+  }, [budgetView]);
   function update<K extends keyof Form>(key: K, value: Form[K]) {
     dirty.current = true; setForm(current => ({ ...current, [key]: value })); setPreview(null); setMessage('');
   }
@@ -56,8 +64,9 @@ export function PlanEditor({ api, overview, version, onRefresh }: { api: OwnerAp
     try {
       if (confirm && preview) {
         await api.request('/v1/plan/confirm', { plan: preview.spec, mode: preview.mode, preview_hash: preview.preview_hash });
-        if (current === generation.current) { dirty.current = false; setMode('revise'); setPreview(null); setMessage('Plan confirmed. Your protections are active.'); }
-        await onRefresh();
+        if (current !== generation.current) return;
+        dirty.current = false; setMode('revise'); setPreview(null); setMessage('Plan confirmed. Your protections are active.');
+        await onRefresh(true);
       } else {
         const result = await api.request<Preview>('/v1/plan/preview', { plan: spec(), mode });
         if (current === generation.current) setPreview(result);
@@ -71,10 +80,22 @@ export function PlanEditor({ api, overview, version, onRefresh }: { api: OwnerAp
       inputMode={['cash', 'buffer', 'income', 'target', 'saved', 'contribution'].includes(key) ? 'decimal' : undefined}
       onChange={event => update(key, event.target.value)} /><small>{helper}</small></div>;
   const submit = (event: FormEvent) => { event.preventDefault(); void run(false); };
+  const plan = overview?.plan;
   return <>
     <section className="panel">
-      <div className="section-top"><div><h2>{overview?.plan ? 'Your financial plan' : 'No plan confirmed yet'}</h2><p>Start with cash, a buffer and your next income. Open the other sections when needed.</p></div><span className="status-label">{overview?.plan?.status.replaceAll('_', ' ') ?? 'Setup needed'}</span></div>
+      <div className="section-top"><div><h2>{plan ? 'Your financial plan' : 'No plan confirmed yet'}</h2><p>{budgetView ? 'Your confirmed protections and expected income.' : 'Start with cash, a buffer and your next income. Open the other sections when needed.'}</p></div><span className="status-label">{plan?.status.replaceAll('_', ' ') ?? 'Setup needed'}</span></div>
       {error && <p className="notice" role="alert">{error}</p>}{message && <p className="notice" role="status">{message}</p>}
+      {budgetView && plan && <section className="review confirmed-budget" aria-label="Confirmed budget plan">
+        <p>{plan.spec.title}. Timezone: {plan.spec.timezone}.</p>
+        <dl><dt>Protected bills</dt><dd>{money(plan.protected_bills_cents)}</dd>
+          <dt>Cash buffer</dt><dd>{money(plan.buffer_cents)}</dd>
+          <dt>Remaining savings contribution</dt><dd>{money(plan.remaining_goal_contribution_cents)}</dd></dl>
+        <p>{plan.spec.next_income ? `Expected income: ${money(plan.spec.next_income.amount_cents)} on ${plan.spec.next_income.due_date}.` : 'Next income is not known.'} Expected income is a forecast only.</p>
+        {plan.spec.bills.length ? <ul>{plan.spec.bills.map(bill => <li key={bill.id}>{bill.name}: {money(bill.amount_cents)}, due {bill.due_date}.</li>)}</ul> : <p>No bills included in this plan.</p>}
+        {plan.spec.goal ? <p>{plan.spec.goal.title}: target {money(plan.spec.goal.target_cents)} by {plan.spec.goal.target_date}; {money(plan.spec.goal.current_saved_cents)} saved separately at confirmation.</p> : <p>No savings goal included.</p>}
+        <button onClick={() => { editing.current = true; onEdit(); }}>Edit plan</button>
+      </section>}
+      <div ref={editor} hidden={budgetView}>
       {!overview?.plan && <AiDraft api={api} version={version} disabled={busy} onBusy={value => { setOtherBusy(value); if (value) setPreview(null); }} onReady={value => {
         dirty.current = true; setForm(fromSpec(value.spec)); setMode('activate'); setPreview(value); setError(''); setMessage('');
       }} />}
@@ -117,6 +138,7 @@ export function PlanEditor({ api, overview, version, onRefresh }: { api: OwnerAp
           <div className="actions"><button className="primary" disabled={!version}>{busy ? 'Checking…' : 'Preview protections'}</button><small>USD only · No money moves</small></div>
         </fieldset>
       </form>
+      </div>
     </section>
     {preview && <section className="panel review" aria-labelledby="review-title"><h2 id="review-title">Review your protections</h2><p>{preview.spec.title}. Timezone: {preview.spec.timezone}. {preview.spec.bills.length} bill(s) included. {preview.spec.goal ? 'Savings goal included.' : 'No savings goal.'}</p><dl>
       <dt>Cash available now</dt><dd>{money(preview.summary.cash_base_cents)}</dd><dt>Protected bills</dt><dd>{money(preview.summary.protected_bills_cents)}</dd><dt>Cash buffer</dt><dd>{money(preview.summary.buffer_cents)}</dd><dt>Savings contribution</dt><dd>{money(preview.summary.remaining_goal_contribution_cents)}</dd><dt>Available to spend</dt><dd>{money(preview.summary.available_cents)}</dd><dt>Forecast with expected income</dt><dd>{money(preview.summary.projected_surplus_cents)}</dd>

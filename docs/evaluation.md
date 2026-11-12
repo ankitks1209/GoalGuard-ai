@@ -5,11 +5,11 @@ actual sandbox observations and future live-model experiments.
 
 | Evidence | Current scope |
 |---|---|
-| Current working-tree local suite | Owner Terminal verified 206 passing cases, zero failures/errors/skips and eight real loopback TCP cases on 21 October 2026; 83.99% branch-aware runtime coverage |
+| November 11 local suite | 231 passing cases, zero failures/errors/skips, nine real loopback TCP cases and 85.43% branch-aware runtime coverage |
 | Historical committed local snapshot | 155 passing cases; retained with its original source/environment provenance |
 | Financial semantics | 43 cases covering plans, goal arithmetic, cash records, revisions, rollover and privacy |
 | Recorded PayPal replay | Four offline regressions using sanitized responses from the actual sandbox run |
-| Actual sandbox | Authorize/capture, authorize/void, same-key replay and controlled reply-loss recovery |
+| Actual sandbox | October 17 authorization, capture, void, same-key replay and controlled reply-loss recovery. November 3 reached order creation and stopped at buyer checkout |
 | Synthetic probing | One deterministic scenario, ten capacities, two quota settings, 20 runs |
 | Live model shopping | Four diagnostic sessions; one completed sequential shared-budget recovery; details below |
 | Live plan drafting | One actual synthetic-input extraction; draft saved, no activation; 691 total tokens |
@@ -22,8 +22,8 @@ their source revision and environment where available. CI runs the local suite,
 probe, demo, distribution build and installed-wheel smoke checks without provider
 credentials. A successful CI run does not establish live PayPal/model behavior.
 
-The 206-case verification is a dirty working-tree observation, not a claim that
-commit 93518ad contains all those changes. Its owner-run build produced both
+The earlier 206-case verification was recorded in a dirty working tree on
+October 21, before the current suite. Its owner-run build produced both
 sdist and wheel, and both pre-commit hooks passed. The wheel contains the draft
 schema/prompt matching source; the sdist inspection excluded private configuration,
 continuity records and the private builder bundle. Setuptools reported a non-fatal

@@ -9,6 +9,7 @@ write to a temporary path when you do not want to update a committed snapshot.
 | [budget-probing.json](budget-probing.json) | Synthetic attack parameters, denominators, per-run transcripts and provenance |
 | [paypal-sandbox.json](paypal-sandbox.json) | Actual sandbox outcomes plus explicitly labeled local guards/injected faults |
 | [gemini-demo.json](gemini-demo.json) | Four actual sessions: two incomplete Flash attempts, one Flash-Lite reservation, then two scoped Flash-Lite callers with sequential denial/recovery |
+| [combined-demo-2026-11-03.json](combined-demo-2026-11-03.json) | Real Gemini proposal, exact-cart consent and verified PayPal sandbox order. Buyer checkout stopped at a currency error |
 | [plan-draft-demo.json](plan-draft-demo.json) | One actual synthetic-input model extraction; draft saved, no activation or payment; original metadata caveat retained |
 | [postman-demo.json](postman-demo.json) | Actual Postman CLI run: 18 synthetic API requests and 45 assertions passed; no model/payment provider calls |
 | [owner-ui-demo.json](owner-ui-demo.json) | Built UI against actual local sessions/CSRF/ledger: simulated extraction, separate plan confirmation and two paired financial records; no model/payment providers |

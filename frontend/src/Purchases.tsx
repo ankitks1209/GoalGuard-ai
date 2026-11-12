@@ -59,7 +59,7 @@ export function Purchases({ api, overview, reading, version, onRefresh }: { api:
       const button = (name: string, label: string, disabled = false) => <button disabled={!!busy || disabled || !version} onClick={() => void action(purchase, name)}>{label}</button>;
       return <article className="purchase-card purchase-review-grid" aria-label={`Purchase ${purchase.id}`} key={purchase.id}>
         <div className="purchase-cart">
-          <h2>{purchase.agent}</h2><p className="muted">{purchase.cart.merchant}</p>
+          <h2 id={`purchase-heading-${purchase.id}`} tabIndex={-1}>{purchase.agent}</h2><p className="muted">{purchase.cart.merchant}</p>
           <table><caption className="muted">Exact cart · {purchase.cart.currency}</caption><thead><tr><th scope="col">Item</th><th scope="col">Qty</th><th scope="col">Unit price</th><th scope="col">Line total</th></tr></thead><tbody>{purchase.cart.items.map(item => <tr key={item.sku}><td>{item.sku}</td><td>{item.quantity}</td><td>{money(item.unit_cents)}</td><td>{money(item.unit_cents * item.quantity)}</td></tr>)}</tbody></table>
           <div className="details-row"><span>Shipping</span><span>{money(purchase.cart.shipping_cents)}</span></div><div className="details-row"><span>Tax</span><span>{money(purchase.cart.tax_cents)}</span></div>
           <p className="purchase-id">Purchase {purchase.id}</p>

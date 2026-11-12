@@ -78,7 +78,10 @@
 - Validate the problem and interface with five consented user conversations.
 - Verify the financial-plan integration through a new complete sandbox demonstration.
 - Add provider final-failure classifications only when supported by verified behavior.
-- Prepare a runnable judging build, a backup recording and a demo under three minutes.
+- The [local judging build](judging.md) covers deterministic proposals and owner
+  consent without provider credentials. The short demo recording and submission
+  description are prepared locally. Publish the source and public video, then
+  verify the submitted links.
 
 Real retailer coverage, automatic savings transfers, bank aggregation, investment
 advice, live-money use and autonomous model payment authority are outside the MVP.

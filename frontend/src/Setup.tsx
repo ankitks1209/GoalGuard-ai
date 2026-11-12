@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { FocusEvent, FormEvent } from 'react';
 import { ApiError, OwnerApi } from './api';
-import type { Overview, Session } from './types';
+import type { Overview, Session, Summary } from './types';
 import { money } from './types';
 import { PlanEditor } from './PlanEditor';
 import { Purchases } from './Purchases';
@@ -30,6 +30,28 @@ function revealFocusedControl(event: FocusEvent<HTMLDivElement>) {
   });
 }
 
+function CashAllocation({ plan }: { plan: Summary }) {
+  const parts = [
+    { label: 'Protected', key: 'protected', cents: plan.protected_cents },
+    { label: 'Committed', key: 'committed', cents: plan.encumbered_cents },
+    { label: 'Spendable', key: 'spendable', cents: plan.available_cents },
+  ];
+  const total = plan.cash_base_cents - plan.spent_cents;
+  if (!plan.can_propose || total <= 0 || parts.some(({ cents }) => !Number.isSafeInteger(cents) || cents < 0)
+    || parts.reduce((sum, { cents }) => sum + cents, 0) !== total) return null;
+  const description = parts.map(({ label, cents }) => `${money(cents)} ${label.toLowerCase()}`).join(', ');
+  return <div className="cash-allocation">
+    {plan.spent_cents > 0 && <p>Cash after captured spending</p>}
+    <div className="allocation-bar" role="img" aria-label={`Cash allocation: ${description}`}>
+      {parts.filter(({ cents }) => cents > 0).map(({ key, cents }) =>
+        <span className={`allocation-${key}`} key={key} style={{ flexGrow: cents }} />)}
+    </div>
+    <ul className="allocation-legend" aria-hidden="true">
+      {parts.map(({ key, label }) => <li key={key}><span className={`allocation-${key}`} />{label}</li>)}
+    </ul>
+  </div>;
+}
+
 export function Setup() {
   const [session, setSession] = useState<Session | null>(null);
   const [checking, setChecking] = useState(true);
@@ -38,6 +60,9 @@ export function Setup() {
   const [overview, setOverview] = useState<Overview | null>(null);
   const [reading, setReading] = useState(false);
   const [screen, setScreen] = useState('Plan');
+  const [reviewTarget, setReviewTarget] = useState<string | null>(null);
+  const [budgetView, setBudgetView] = useState(false);
+  const budgetHeading = useRef<HTMLHeadingElement>(null);
   const epoch = useRef(0);
   const apiRef = useRef<OwnerApi | null>(null);
   if (!apiRef.current) apiRef.current = new OwnerApi(() => lock('Session expired. Unlock again; your unsaved input is retained. No changes will be retried automatically.'));
@@ -46,9 +71,9 @@ export function Setup() {
   function lock(message: string) {
     epoch.current++;
     if (apiRef.current) apiRef.current.csrf = '';
-    setSession(null); setOverview(null); setReading(false); setNotice(message);
+    setSession(null); setOverview(null); setReading(false); setBudgetView(false); setReviewTarget(null); setNotice(message);
   }
-  async function refresh() {
+  async function refresh(afterConfirmation = false) {
     const current = epoch.current;
     setReading(true);
     try {
@@ -56,7 +81,13 @@ export function Setup() {
       if (!data || !Array.isArray(data.purchases) || !Array.isArray(data.events) || data.plan === undefined) {
         throw new Error('The workspace response was incomplete. Check the local server and refresh status.');
       }
-      if (current === epoch.current) { setOverview(data); setNotice(''); }
+      if (current === epoch.current) {
+        setOverview(data); setNotice('');
+        if (afterConfirmation) {
+          if (data.plan) { setScreen('Plan'); setBudgetView(true); }
+          else setNotice('Your plan was confirmed, but the current budget could not be read. Refresh workspace before making further changes.');
+        }
+      }
     } catch (error) {
       if (current === epoch.current) setNotice((error as Error).message);
     } finally {
@@ -84,6 +115,14 @@ export function Setup() {
     const timer = window.setTimeout(() => lock('Session expired. Unlock again; your unsaved input is retained. No changes will be retried automatically.'), session.expires_in_seconds * 1000);
     return () => window.clearTimeout(timer);
   }, [session]);
+  useEffect(() => {
+    if (!budgetView || !session) return;
+    budgetHeading.current?.focus();
+    budgetHeading.current?.scrollIntoView({ behavior: 'instant', block: 'start' });
+  }, [budgetView, session]);
+  useEffect(() => {
+    if (screen === 'Purchases' && reviewTarget) document.getElementById(`purchase-heading-${reviewTarget}`)?.focus();
+  }, [screen, reviewTarget]);
 
   async function unlock(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -104,6 +143,7 @@ export function Setup() {
   }
 
   const plan = session ? overview?.plan : null;
+  const amount = plan ? money(plan.available_cents) : '—';
   return (
     <div className="workspace" onFocusCapture={revealFocusedControl}>
       <a className="skip" href="#main">Skip to content</a>
@@ -111,7 +151,7 @@ export function Setup() {
         <a className="brand" href="#main" aria-label="GoalGuard">goal<span>guard</span></a>
         <nav aria-label="Workspace">{navigation.map(({ name, label, description, path }) =>
           <button key={name} aria-label={name === 'Plan' ? 'Budget and plan' : name}
-            aria-current={screen === name ? 'page' : undefined} onClick={() => setScreen(name)}>
+            aria-current={screen === name ? 'page' : undefined} onClick={() => { setReviewTarget(null); setScreen(name); }}>
             <svg className="nav-icon" viewBox="0 0 56 64" aria-hidden="true"><path d={path} /></svg>
             <span><span className="nav-name">{label}</span><span className="nav-description">{description}</span></span>
           </button>)}</nav>
@@ -120,12 +160,18 @@ export function Setup() {
         <header className="topbar"><span>Owner workspace / <strong>{screen === 'Plan' ? 'Budget' : screen}</strong></span><div><span className="badge">PayPal sandbox</span>{session && <button className="text-button" disabled={busy} onClick={() => void logout()}>Lock workspace</button>}</div></header>
         <main id="main" tabIndex={-1}>
           {notice && <p role="alert" className="notice">{notice}</p>}
-          <div className="budget-workspace" hidden={screen !== 'Plan' && !!session}>
+          <div className={plan ? 'budget-workspace budget-workspace-active' : 'budget-workspace'} hidden={screen !== 'Plan' && !!session}>
             <section className="budget-overview" aria-label="Plan overview">
-              <h1>Your budget.<br />In your hands.</h1>
-              <p className="balance-label">Safely spendable</p>
-              <div className="amount">{plan ? money(plan.available_cents) : '—'}</div>
-              <p className="currency">USD. After protections and commitments.</p>
+              <div className={plan ? 'balance-panel' : undefined}>
+                <h1 ref={budgetHeading} tabIndex={-1}>{plan
+                  ? plan.available_cents < 0 ? 'Budget shortfall' : plan.can_propose ? 'Safely spendable' : 'Budget balance'
+                  : <>Your budget.<br />In your hands.</>}</h1>
+                {!plan && <p className="balance-label">Safely spendable</p>}
+                <div className={amount.length > 9 ? 'amount amount-long' : 'amount'}>{amount}</div>
+                <p className="currency">{plan ? 'USD after bills, buffer, savings and purchase commitments' : 'USD. After protections and commitments.'}</p>
+                {plan && !plan.can_propose && <p className="budget-pause">New purchase requests are paused.</p>}
+                {plan && <CashAllocation plan={plan} />}
+              </div>
               <dl className="budget-facts">{[
                 ['Cash balance', plan?.cash_base_cents], ['Protected', plan?.protected_cents],
                 ['Purchase commitments', plan?.encumbered_cents], ['Captured spending', plan?.spent_cents],
@@ -139,7 +185,8 @@ export function Setup() {
                 : <ul className="request-list">{overview.purchases.map(purchase => <li key={purchase.id}>
                   <div className="request-title"><h3>{purchase.agent}</h3><strong>{money(purchase.amount_cents)}</strong></div>
                   <p className="muted">{purchase.cart.merchant}. {purchase.state.replaceAll('_', ' ')}.</p>
-                  <button className="primary" aria-label={`Review cart from ${purchase.agent}`} onClick={() => setScreen('Purchases')}>Review cart</button>
+                  <button className="primary" aria-label={`Review cart from ${purchase.agent}`}
+                    onClick={() => { setReviewTarget(purchase.id); setScreen('Purchases'); }}>Review cart</button>
                 </li>)}</ul>}
             </section>
           </div>
@@ -147,7 +194,8 @@ export function Setup() {
           <section hidden={!session}>
             {reading && screen === 'Plan' && <p role="status">Loading your workspace…</p>}
             <div className="actions" hidden={screen !== 'Plan'}><button onClick={() => void refresh()}>Refresh workspace</button><small>Reads current status. No payment retries.</small></div>
-            <div hidden={screen !== 'Plan' || !overview}><PlanEditor api={api} overview={overview} version={session?.csrf_token ?? ''} onRefresh={refresh} /></div>
+            <div hidden={screen !== 'Plan' || !overview}><PlanEditor api={api} overview={overview} version={session?.csrf_token ?? ''}
+              budgetView={budgetView} onEdit={() => setBudgetView(false)} onRefresh={refresh} /></div>
             <div hidden={screen !== 'Purchases'}><Purchases api={api} overview={overview} reading={reading} version={session?.csrf_token ?? ''} onRefresh={refresh} /></div>
             <div hidden={screen !== 'Timeline'}><Timeline events={overview?.events ?? null} reading={reading} onRefresh={refresh} /></div>
           </section>
